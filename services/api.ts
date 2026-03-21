@@ -14,7 +14,7 @@ export const getFileUrl = (url: string): string => {
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
-  return `${FILE_BASE_URL}/uploads/${url.replace(/^\//, "")}`;
+  return `${FILE_BASE_URL}/${url.replace(/^\//, "")}`;
 };
 
 export const api = axios.create({

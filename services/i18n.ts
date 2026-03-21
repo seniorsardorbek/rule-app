@@ -1,0 +1,242 @@
+import { useAppSelector } from "../store/hooks";
+import type { AppLang } from "../store/slices/langSlice";
+
+const translations = {
+  uz: {
+    // Common
+    loading: "Yuklanmoqda...",
+    goBack: "Orqaga",
+    error: "Xatolik",
+
+    // Home
+    hello: "Salom",
+    whatLearnToday: "Bugun nima o'rganasiz?",
+    dailyChallenge: "Kunlik sinov",
+    dailyChallengeDesc: "Bugungi testni bajaring va bilimingizni sinab ko'ring",
+    startNow: "Boshlash",
+    availableQuizzes: "Mavjud testlar",
+    seeAll: "Hammasini ko'rish",
+    noQuizzesYet: "Hali testlar mavjud emas",
+
+    // Quiz list
+    quizzes: "Testlar",
+    testYourKnowledge: "Bilimingizni sinab ko'ring",
+    loadingQuizzes: "Testlar yuklanmoqda...",
+    connectionError: "Ulanish xatosi",
+    connectionErrorDesc: "Testlarni yuklab bo'lmadi. Yangilash uchun tortib pastga o'tkazing.",
+    noQuizzesAvailable: "Testlar mavjud emas",
+    noQuizzesAvailableDesc: "Keyinroq tekshirib ko'ring",
+    questions: "savol",
+
+    // Quiz play
+    loadingQuiz: "Test yuklanmoqda...",
+    failedToLoadQuiz: "Testni yuklashda xatolik",
+    noQuestions: "Bu testda savollar yo'q",
+    questionOf: "savol",
+    of: "dan",
+    answered: "javob berildi",
+    tekshirish: "Tekshirish",
+    keyingisi: "Keyingisi",
+    ortga: "Ortga",
+    yakunlash: "Yakunlash",
+    baribir: "Baribir yuborish",
+    correctAnswer: "To'g'ri javob",
+    yourAnswer: "Sizning javobingiz",
+    notAnswered: "Javob berilmagan",
+
+    // Results
+    loadingResults: "Natijalar yuklanmoqda...",
+    noResults: "Natijalar mavjud emas",
+    correct: "To'g'ri",
+    wrong: "Noto'g'ri",
+    attempt: "Urinish",
+    questionBreakdown: "Savol tahlili",
+    allQuizzes: "Barcha testlar",
+    tryAgain: "Qayta urinish",
+    excellent: "Ajoyib! 🎉",
+    goodJob: "Yaxshi! 👍",
+    keepTrying: "Davom eting! 💪",
+    youScored: "Siz",
+    outOf: "dan",
+    questionsCorrectly: "ta savolga to'g'ri javob berdingiz",
+
+    // Profile
+    profile: "Profil",
+    language: "Til",
+    languageDesc: "Interfeys tilini tanlang",
+    notifications: "Bildirishnomalar",
+    privacy: "Maxfiylik",
+    helpSupport: "Yordam va qo'llab-quvvatlash",
+    about: "Dastur haqida",
+    signOut: "Chiqish",
+    signOutConfirmTitle: "Chiqish",
+    signOutConfirmMsg: "Rostdan ham chiqmoqchimisiz?",
+    cancel: "Bekor qilish",
+
+    // Languages
+    langUz: "O'zbek (Lotin)",
+    langOz: "Ўзбек (Кирилл)",
+    langRu: "Русский",
+  },
+
+  oz: {
+    // Common
+    loading: "Юкланмоқда...",
+    goBack: "Орқага",
+    error: "Хатолик",
+
+    // Home
+    hello: "Салом",
+    whatLearnToday: "Бугун нима ўрганасиз?",
+    dailyChallenge: "Кунлик синов",
+    dailyChallengeDesc: "Бугунги тестни бажаринг ва билимингизни синаб кўринг",
+    startNow: "Бошлаш",
+    availableQuizzes: "Мавжуд тестлар",
+    seeAll: "Ҳаммасини кўриш",
+    noQuizzesYet: "Ҳали тестлар мавжуд эмас",
+
+    // Quiz list
+    quizzes: "Тестлар",
+    testYourKnowledge: "Билимингизни синаб кўринг",
+    loadingQuizzes: "Тестлар юкланмоқда...",
+    connectionError: "Уланиш хатоси",
+    connectionErrorDesc: "Тестларни юклаб бўлмади. Янгилаш учун тортиб пастга ўтказинг.",
+    noQuizzesAvailable: "Тестлар мавжуд эмас",
+    noQuizzesAvailableDesc: "Кейинроқ текшириб кўринг",
+    questions: "савол",
+
+    // Quiz play
+    loadingQuiz: "Тест юкланмоқда...",
+    failedToLoadQuiz: "Тестни юклашда хатолик",
+    noQuestions: "Бу тестда саволлар йўқ",
+    questionOf: "савол",
+    of: "дан",
+    answered: "жавоб берилди",
+    tekshirish: "Текшириш",
+    keyingisi: "Кейингиси",
+    ortga: "Орқага",
+    yakunlash: "Якунлаш",
+    baribir: "Барибир юбориш",
+    correctAnswer: "Тўғри жавоб",
+    yourAnswer: "Сизнинг жавобингиз",
+    notAnswered: "Жавоб берилмаган",
+
+    // Results
+    loadingResults: "Натижалар юкланмоқда...",
+    noResults: "Натижалар мавжуд эмас",
+    correct: "Тўғри",
+    wrong: "Нотўғри",
+    attempt: "Уриниш",
+    questionBreakdown: "Савол таҳлили",
+    allQuizzes: "Барча тестлар",
+    tryAgain: "Қайта уриниш",
+    excellent: "Ажойиб! 🎉",
+    goodJob: "Яхши! 👍",
+    keepTrying: "Давом этинг! 💪",
+    youScored: "Сиз",
+    outOf: "дан",
+    questionsCorrectly: "та саволга тўғри жавоб бердингиз",
+
+    // Profile
+    profile: "Профил",
+    language: "Тил",
+    languageDesc: "Интерфейс тилини танланг",
+    notifications: "Билдиришномалар",
+    privacy: "Махфийлик",
+    helpSupport: "Ёрдам ва қўллаб-қувватлаш",
+    about: "Дастур ҳақида",
+    signOut: "Чиқиш",
+    signOutConfirmTitle: "Чиқиш",
+    signOutConfirmMsg: "Ростдан ҳам чиқмоқчимисиз?",
+    cancel: "Бекор қилиш",
+
+    // Languages
+    langUz: "O'zbek (Lotin)",
+    langOz: "Ўзбек (Кирилл)",
+    langRu: "Русский",
+  },
+
+  ru: {
+    // Common
+    loading: "Загрузка...",
+    goBack: "Назад",
+    error: "Ошибка",
+
+    // Home
+    hello: "Привет",
+    whatLearnToday: "Что будете изучать сегодня?",
+    dailyChallenge: "Ежедневный тест",
+    dailyChallengeDesc: "Пройдите сегодняшний тест и проверьте свои знания",
+    startNow: "Начать",
+    availableQuizzes: "Доступные тесты",
+    seeAll: "Все",
+    noQuizzesYet: "Тестов пока нет",
+
+    // Quiz list
+    quizzes: "Тесты",
+    testYourKnowledge: "Проверьте свои знания",
+    loadingQuizzes: "Загрузка тестов...",
+    connectionError: "Ошибка соединения",
+    connectionErrorDesc: "Не удалось загрузить тесты. Потяните вниз для обновления.",
+    noQuizzesAvailable: "Тесты недоступны",
+    noQuizzesAvailableDesc: "Загляните позже",
+    questions: "вопр.",
+
+    // Quiz play
+    loadingQuiz: "Загрузка теста...",
+    failedToLoadQuiz: "Не удалось загрузить тест",
+    noQuestions: "В этом тесте нет вопросов",
+    questionOf: "вопрос",
+    of: "из",
+    answered: "отвечено",
+    tekshirish: "Проверить",
+    keyingisi: "Далее",
+    ortga: "Назад",
+    yakunlash: "Завершить",
+    baribir: "Отправить всё равно",
+    correctAnswer: "Правильный ответ",
+    yourAnswer: "Ваш ответ",
+    notAnswered: "Нет ответа",
+
+    // Results
+    loadingResults: "Загрузка результатов...",
+    noResults: "Результаты недоступны",
+    correct: "Верно",
+    wrong: "Неверно",
+    attempt: "Попытка",
+    questionBreakdown: "Разбор вопросов",
+    allQuizzes: "Все тесты",
+    tryAgain: "Попробовать снова",
+    excellent: "Отлично! 🎉",
+    goodJob: "Хорошо! 👍",
+    keepTrying: "Продолжайте! 💪",
+    youScored: "Вы ответили верно на",
+    outOf: "из",
+    questionsCorrectly: "вопросов",
+
+    // Profile
+    profile: "Профиль",
+    language: "Язык",
+    languageDesc: "Выберите язык интерфейса",
+    notifications: "Уведомления",
+    privacy: "Конфиденциальность",
+    helpSupport: "Помощь и поддержка",
+    about: "О приложении",
+    signOut: "Выйти",
+    signOutConfirmTitle: "Выйти",
+    signOutConfirmMsg: "Вы уверены, что хотите выйти?",
+    cancel: "Отмена",
+
+    // Languages
+    langUz: "O'zbek (Lotin)",
+    langOz: "Ўзбек (Кирилл)",
+    langRu: "Русский",
+  },
+} as const;
+
+export type TKey = keyof typeof translations.uz;
+
+export const useT = (): ((key: TKey) => string) => {
+  const lang: AppLang = useAppSelector((s) => s.lang.lang);
+  return (key: TKey) => translations[lang][key] as string;
+};

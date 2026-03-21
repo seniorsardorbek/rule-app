@@ -3,9 +3,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useAppSelector } from "../../store/hooks";
-import { useQuizzes } from "../../services/quiz";
+import { useQuizzes, pickLang } from "../../services/quiz";
+import { useT } from "../../services/i18n";
 
 export default function HomeScreen() {
+  const t = useT();
   const user = useAppSelector((s) => s.auth.user);
   const { data, isLoading } = useQuizzes({ limit: 4 });
   const quizzes = data?.data ?? [];
@@ -17,9 +19,9 @@ export default function HomeScreen() {
       <ScrollView className="flex-1" contentContainerClassName="px-5 py-4">
         <View className="mb-6">
           <Text className="text-2xl font-bold text-gray-900">
-            Hello, {displayName} 👋
+            {t("hello")}, {displayName} 👋
           </Text>
-          <Text className="text-gray-500 mt-1">What will you learn today?</Text>
+          <Text className="text-gray-500 mt-1">{t("whatLearnToday")}</Text>
         </View>
 
         {/* Daily Challenge Banner */}
@@ -29,14 +31,14 @@ export default function HomeScreen() {
           activeOpacity={0.85}
         >
           <Text className="text-white text-lg font-bold mb-1">
-            Daily Challenge
+            {t("dailyChallenge")}
           </Text>
           <Text className="text-blue-100 text-sm mb-4">
-            Complete today's quiz and test your skills
+            {t("dailyChallengeDesc")}
           </Text>
           <View className="bg-white rounded-xl py-2 px-4 self-start">
             <Text className="text-blue-600 font-semibold text-sm">
-              Start Now
+              {t("startNow")}
             </Text>
           </View>
         </TouchableOpacity>
@@ -44,10 +46,10 @@ export default function HomeScreen() {
         {/* Recent Quizzes */}
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-lg font-bold text-gray-900">
-            Available Quizzes
+            {t("availableQuizzes")}
           </Text>
           <TouchableOpacity onPress={() => router.push("/(tabs)/quiz")}>
-            <Text className="text-blue-600 text-sm font-medium">See All</Text>
+            <Text className="text-blue-600 text-sm font-medium">{t("seeAll")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -57,12 +59,8 @@ export default function HomeScreen() {
           </View>
         ) : quizzes.length === 0 ? (
           <View className="bg-white rounded-2xl p-6 items-center border border-gray-100">
-            <Ionicons
-              name="document-text-outline"
-              size={36}
-              color="#9CA3AF"
-            />
-            <Text className="text-gray-500 mt-2">No quizzes available yet</Text>
+            <Ionicons name="document-text-outline" size={36} color="#9CA3AF" />
+            <Text className="text-gray-500 mt-2">{t("noQuizzesYet")}</Text>
           </View>
         ) : (
           <View className="gap-3">
@@ -77,19 +75,13 @@ export default function HomeScreen() {
                   className="text-base font-semibold text-gray-900 mb-1"
                   numberOfLines={1}
                 >
-                  {quiz.title}
+                  {pickLang(quiz.name_uz, quiz.name_oz, quiz.name_ru)}
                 </Text>
-                <View className="flex-row items-center gap-3">
-                  <View className="flex-row items-center gap-1">
-                    <Ionicons
-                      name="help-circle-outline"
-                      size={14}
-                      color="#6B7280"
-                    />
-                    <Text className="text-gray-500 text-sm">
-                      {quiz.questions?.length ?? 0} questions
-                    </Text>
-                  </View>
+                <View className="flex-row items-center gap-1">
+                  <Ionicons name="help-circle-outline" size={14} color="#6B7280" />
+                  <Text className="text-gray-500 text-sm">
+                    {quiz.questions?.length ?? 0} {t("questions")}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}

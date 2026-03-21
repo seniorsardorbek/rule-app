@@ -4,12 +4,14 @@ interface QuizState {
   currentQuizId: string | null;
   answers: Record<string, string>; // questionId -> selectedOptionId
   submitted: boolean;
+  resultId: string | null;
 }
 
 const initialState: QuizState = {
   currentQuizId: null,
   answers: {},
   submitted: false,
+  resultId: null,
 };
 
 const quizSlice = createSlice({
@@ -20,6 +22,7 @@ const quizSlice = createSlice({
       state.currentQuizId = action.payload;
       state.answers = {};
       state.submitted = false;
+      state.resultId = null;
     },
     selectAnswer(
       state,
@@ -27,13 +30,15 @@ const quizSlice = createSlice({
     ) {
       state.answers[action.payload.questionId] = action.payload.optionId;
     },
-    submitQuiz(state) {
+    submitQuiz(state, action: PayloadAction<string>) {
       state.submitted = true;
+      state.resultId = action.payload;
     },
     resetQuiz(state) {
       state.currentQuizId = null;
       state.answers = {};
       state.submitted = false;
+      state.resultId = null;
     },
   },
 });
