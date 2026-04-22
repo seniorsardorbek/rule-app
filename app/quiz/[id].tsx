@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -13,6 +14,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuiz, useSubmitResult, pickLang } from "../../services/quiz";
 import { useT } from "../../services/i18n";
 import { getFileUrl } from "../../services/api";
+import { verifyMeApi } from "../../services/auth";
+import { storage } from "../../services/storage";
+import { setCredentials } from "../../store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   startQuiz,
@@ -104,18 +108,51 @@ export default function QuizPlayScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
-    const payload = sortedQuestions.map((q) => ({
-      questionId: q.id,
-      selectedOptionId: answers[q.id] ?? null,
-    }));
-    const result = await submitResult.mutateAsync({
-      userId: user.id,
-      quizId: quiz.id,
-      answers: payload,
-    });
-    dispatch(submitQuiz(result.id));
-    router.replace("/quiz/results");
+    if (submitResult.isPending) return;
+
+    // Redux `user` can be lost (dev fast-refresh, cold app resume) while the
+    // access token in storage is still valid. Re-hydrate before giving up.
+    let userId = user?.id;
+    if (!userId) {
+      const token = await storage.getItem("access_token");
+      if (!token) {
+        Alert.alert("Error", "You are not signed in.");
+        return;
+      }
+      try {
+        const verified = await verifyMeApi();
+        if (verified.isLoggedIn && verified.user) {
+          dispatch(setCredentials({ user: verified.user, token }));
+          userId = verified.user.id;
+        }
+      } catch (e) {
+        console.error("[Quiz submit] re-verify failed", e);
+      }
+      if (!userId) {
+        Alert.alert("Error", "Session expired. Please sign in again.");
+        return;
+      }
+    }
+
+    try {
+      const payload = sortedQuestions.map((q) => ({
+        questionId: q.id,
+        selectedOptionId: answers[q.id] ?? null,
+      }));
+      const result = await submitResult.mutateAsync({
+        userId,
+        quizId: quiz.id,
+        answers: payload,
+      });
+      dispatch(submitQuiz(result.id));
+      router.replace("/quiz/results");
+    } catch (e: any) {
+      console.error("[Quiz submit] failed", e?.response?.data ?? e?.message ?? e);
+      Alert.alert(
+        "Submit failed",
+        e?.response?.data?.message ?? e?.message ?? "Unknown error",
+      );
+    }
   };
 
   const progress = ((currentIndex + 1) / totalQuestions) * 100;

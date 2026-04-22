@@ -12,19 +12,19 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Asosiy",
-        }}
-      />
-      <Tabs.Screen
-        name="quiz"
-        options={{
-          title: "Testlar",
+          title: "AI kuzatuv",
         }}
       />
       <Tabs.Screen
         name="study"
         options={{
-          title: "O'qish",
+          title: "Darslik",
+        }}
+      />
+      <Tabs.Screen
+        name="quiz"
+        options={{
+          title: "Test",
         }}
       />
       <Tabs.Screen

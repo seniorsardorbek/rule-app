@@ -16,6 +16,7 @@ export default function QuizLayout() {
         name="results"
         options={{ title: "Results", headerBackVisible: false }}
       />
+      <Stack.Screen name="mistakes" options={{ title: "Mistakes" }} />
     </Stack>
   );
 }

@@ -8,12 +8,17 @@ import { verifyMeApi } from "../services/auth";
 
 export default function Index() {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, tokenLoaded } = useAppSelector((s) => s.auth);
+  const { isAuthenticated, tokenLoaded, user } = useAppSelector((s) => s.auth);
   const [checking, setChecking] = useState(true);
+  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check local onboarding status
+        const onboardingCompleted = await storage.getItem("onboarding_completed");
+        setOnboardingDone(onboardingCompleted === "true");
+
         const token = await storage.getItem("access_token");
         if (!token) {
           dispatch(setTokenLoaded());
@@ -24,6 +29,11 @@ export default function Index() {
         const result = await verifyMeApi();
         if (result.isLoggedIn && result.user) {
           dispatch(setCredentials({ user: result.user, token }));
+          // If user has onboarding data on server, mark it locally too
+          if (result.user.onboarding) {
+            await storage.setItem("onboarding_completed", "true");
+            setOnboardingDone(true);
+          }
         } else {
           await storage.deleteItem("access_token");
           dispatch(setTokenLoaded());
@@ -47,8 +57,19 @@ export default function Index() {
     );
   }
 
+  // If authenticated but no onboarding data → show onboarding
+  if (isAuthenticated && !user?.onboarding) {
+    return <Redirect href="/(onboarding)" />;
+  }
+
+  // If authenticated and has onboarding → go to main app
   if (isAuthenticated) {
     return <Redirect href="/(tabs)" />;
+  }
+
+  // Not authenticated: check if onboarding was done locally (pre-registration)
+  if (!onboardingDone) {
+    return <Redirect href="/(onboarding)" />;
   }
 
   return <Redirect href="/(auth)/login" />;

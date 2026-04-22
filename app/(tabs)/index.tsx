@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { useAppSelector } from "../../store/hooks";
 import { useQuizzes, pickLang } from "../../services/quiz";
 import { useT } from "../../services/i18n";
+import { PerformanceWidget } from "../../components/PerformanceWidget";
 
 export default function HomeScreen() {
   const t = useT();
@@ -23,6 +24,9 @@ export default function HomeScreen() {
           </Text>
           <Text className="text-gray-500 mt-1">{t("whatLearnToday")}</Text>
         </View>
+
+        {/* Daily performance */}
+        {user?.id ? <PerformanceWidget userId={user.id} /> : null}
 
         {/* Daily Challenge Banner */}
         <TouchableOpacity

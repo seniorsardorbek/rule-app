@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "./api";
 import { store } from "../store";
 
@@ -42,6 +42,15 @@ export interface QuizQuestion {
   options: QuizOption[];
 }
 
+export interface QuizLastResult {
+  id: string;
+  attempt: number;
+  total_questions: number;
+  correct_count: number;
+  incorrect_count: number;
+  created_at: string;
+}
+
 export interface Quiz {
   id: string;
   name_uz: string;
@@ -50,6 +59,7 @@ export interface Quiz {
   description?: string;
   is_active: boolean;
   questions: QuizQuestion[];
+  last_result?: QuizLastResult | null;
   created_at: string;
   updated_at: string;
 }
@@ -103,8 +113,67 @@ export const getQuizzesApi = async (
   params: QuizzesQueryParams = {},
 ): Promise<QuizzesResponse> => {
   const response = await api.get<QuizzesResponse>("/quiz", {
-    params: { ...params, is_active: true },
+    params: { limit: 1000, ...params, is_active: true },
   });
+  return response.data;
+};
+
+export interface MistakesPracticeSubmitRequest {
+  userId: string;
+  answers: { questionId: string; selectedOptionId: string | null }[];
+}
+
+export interface MistakesPracticeSubmitResponse {
+  attempted: number;
+  corrected: number;
+  stillWrong: number;
+  updatedResults: {
+    id: string;
+    quiz_id: string;
+    attempt: number;
+    correct_count: number;
+    incorrect_count: number;
+    total_questions: number;
+  }[];
+}
+
+export const getMistakesPracticeApi = async (
+  userId: string,
+): Promise<QuizQuestion[]> => {
+  const response = await api.get<QuizQuestion[]>(
+    `/quiz/results/user/${userId}/mistakes-practice`,
+  );
+  return response.data;
+};
+
+export interface TodayPerformance {
+  daily_time: string | null;
+  goal_minutes: number | null;
+  goal_questions: number | null;
+  goal_quizzes: number | null;
+  today_questions: number;
+  today_attempts: number;
+  today_quiz_attempts: number;
+  today_mistakes_sessions: number;
+  performance_percent: number | null;
+}
+
+export const getTodayPerformanceApi = async (
+  userId: string,
+): Promise<TodayPerformance> => {
+  const response = await api.get<TodayPerformance>(
+    `/quiz/results/user/${userId}/today`,
+  );
+  return response.data;
+};
+
+export const submitMistakesPracticeApi = async (
+  data: MistakesPracticeSubmitRequest,
+): Promise<MistakesPracticeSubmitResponse> => {
+  const response = await api.post<MistakesPracticeSubmitResponse>(
+    "/quiz/results/mistakes-practice",
+    data,
+  );
   return response.data;
 };
 
@@ -187,5 +256,40 @@ export const useUserIncorrect = (userId: string, quizId?: string) => {
 };
 
 export const useSubmitResult = () => {
-  return useMutation({ mutationFn: submitResultApi });
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: submitResultApi,
+    onSuccess: () => {
+      // Refresh quiz list so the new attempt's stats show on the card
+      qc.invalidateQueries({ queryKey: ["quizzes"] });
+      qc.invalidateQueries({ queryKey: ["results"] });
+    },
+  });
+};
+
+export const useMistakesPractice = (userId: string) => {
+  return useQuery({
+    queryKey: ["results", "user", userId, "mistakes-practice"],
+    queryFn: () => getMistakesPracticeApi(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useTodayPerformance = (userId: string) => {
+  return useQuery({
+    queryKey: ["results", "user", userId, "today"],
+    queryFn: () => getTodayPerformanceApi(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useSubmitMistakesPractice = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: submitMistakesPracticeApi,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["quizzes"] });
+      qc.invalidateQueries({ queryKey: ["results"] });
+    },
+  });
 };

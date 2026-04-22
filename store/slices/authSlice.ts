@@ -12,6 +12,15 @@ export interface User {
     city?: string;
     country?: string;
   };
+  onboarding?: {
+    language?: string;
+    gender?: string;
+    age?: string;
+    problems?: string[];
+    daily_time?: string;
+    exam_date?: string;
+    completed_at?: string;
+  } | null;
 }
 
 interface AuthState {

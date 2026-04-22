@@ -1,12 +1,15 @@
 import axios from "axios";
 import { storage } from "./storage";
 import { router } from "expo-router";
+import Constants from "expo-constants";
 
-// const API_BASE_URL = "http://192.168.3.130:4000/api";
-// const API_BASE_URL = "http://192.168.3.130:4000/api";
-const API_BASE_URL = "http://172.20.10.3:4000/api";
+// Extract the laptop's IP dynamically during development so it works across changing Wi-Fi networks
+// hostUri typically looks like "192.168.x.x:8081"
+const hostUri = Constants.expoConfig?.hostUri;
+const localIp = hostUri ? hostUri.split(":")[0] : "localhost";
 
-const FILE_BASE_URL = "http://172.20.10.3:4000";
+const API_BASE_URL = `http://${localIp}:4000/api`;
+const FILE_BASE_URL = `http://${localIp}:4000`;
 
 // Helper to get full file URL (without /api prefix)
 export const getFileUrl = (url: string): string => {

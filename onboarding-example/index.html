@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RULE Onboarding</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="card">
+        
+        <!-- STEP 1: Language -->
+        <div class="step active" data-step="1">
+            <div class="icon-box">🚗</div>
+            <h2>Pravaga birinchi urinishda topshirishga tayyormisiz?</h2>
+            <p class="subtitle">Tilni tanlang</p>
+            <div class="options-list">
+                <button class="option-btn" onclick="selectOption('language', 'uz', 2)">
+                    <span class="emoji">🇺🇿</span> O'zbekcha (lotin)
+                </button>
+                <button class="option-btn" onclick="selectOption('language', 'uz_cyrl', 2)">
+                    <span class="emoji">🇺🇿</span> Ўзбекча (кирил)
+                </button>
+                <button class="option-btn" onclick="selectOption('language', 'ru', 2)">
+                    <span class="emoji">🇷🇺</span> Русский
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Gender -->
+        <div class="step" data-step="2">
+            <h2>Jinsingizni tanlang</h2>
+            <p class="subtitle">Shaxsiy rejani to'g'ri shakllantirish uchun</p>
+            <div class="options-grid">
+                <div class="option-card" onclick="selectOption('gender', 'male', 3)">
+                    <div class="emoji-big">👨</div>
+                    <span>Erkak</span>
+                </div>
+                <div class="option-card" onclick="selectOption('gender', 'female', 3)">
+                    <div class="emoji-big">👩</div>
+                    <span>Ayol</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Age -->
+        <div class="step" data-step="3">
+            <h2>Yoshingiz nechida?</h2>
+            <div class="options-list">
+                <button class="option-btn" onclick="selectOption('age', '17-19', 4)">17 - 19</button>
+                <button class="option-btn" onclick="selectOption('age', '20-24', 4)">20 - 24</button>
+                <button class="option-btn" onclick="selectOption('age', '25-30', 4)">25 - 30</button>
+                <button class="option-btn" onclick="selectOption('age', '31-35', 4)">31 - 35</button>
+                <button class="option-btn" onclick="selectOption('age', '36+', 4)">36 va undan katta</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Problems (Multi-select) -->
+        <div class="step" data-step="4">
+            <h2>Sizga nima ko'proq muammo tug'diryapti?</h2>
+            <p class="subtitle">Bir nechtasini tanlashingiz mumkin</p>
+            <div class="options-list" id="problems-list">
+                <label class="checkbox-btn">
+                    <input type="checkbox" value="time">
+                    <span class="content">Vaqtim juda kam ⏱️</span>
+                </label>
+                <label class="checkbox-btn">
+                    <input type="checkbox" value="hard">
+                    <span class="content">Chiptalar juda murakkab 🤯</span>
+                </label>
+                <label class="checkbox-btn">
+                    <input type="checkbox" value="forget">
+                    <span class="content">O'qiganimni tez unutib qo'yaman 🧠</span>
+                </label>
+                <label class="checkbox-btn">
+                    <input type="checkbox" value="first_time">
+                    <span class="content">Birinchi marta topshiryapman 🔰</span>
+                </label>
+            </div>
+            <button class="primary-btn mt-4" onclick="goToStep(5)">Keyingi <span class="arrow">→</span></button>
+        </div>
+
+        <!-- STEP 5: Solutions (Info) -->
+        <div class="step text-center" data-step="5">
+            <div class="icon-box pulse mb-4">💡</div>
+            <h2>Bizda aynan siz uchun yechim bor</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="check">✓</span>
+                    <span>Kuniga atigi 15 daqiqa ajratsangiz yetarli</span>
+                </div>
+                <div class="info-item">
+                    <span class="check">✓</span>
+                    <span>Qiziqarli video tushuntirishlar</span>
+                </div>
+                <div class="info-item">
+                    <span class="check">✓</span>
+                    <span>Sun'iy intellekt xatolaringiz ustida ishlashga yordam beradi</span>
+                </div>
+            </div>
+            <button class="primary-btn mt-4" onclick="goToStep(6)">Davom etish</button>
+        </div>
+
+        <!-- STEP 6: Daily Time -->
+        <div class="step" data-step="6">
+            <h2>Tayyorgarlik uchun kuniga qancha vaqt ajrata olasiz?</h2>
+            <div class="options-list">
+                <button class="option-btn" onclick="selectOption('time', '15m', 7)">15-20 daqiqa (Sekin va ishonchli)</button>
+                <button class="option-btn" onclick="selectOption('time', '30m', 7)">30-45 daqiqa (O'rtacha temp)</button>
+                <button class="option-btn" onclick="selectOption('time', '1h', 7)">1 soat (Tezkor)</button>
+                <button class="option-btn" onclick="selectOption('time', '2h', 7)">1 soatdan ko'p (Intensiv)</button>
+            </div>
+        </div>
+
+        <!-- STEP 7: Exam Date -->
+        <div class="step" data-step="7">
+            <h2>Imtihoningiz qachon?</h2>
+            <p class="subtitle">Taxminiy sanani tanlang</p>
+            <div class="date-picker-wrap">
+                <input type="date" id="examDate" class="glass-input">
+            </div>
+            <button class="primary-btn mt-4" onclick="finishDate()">Rejani hisoblash ⚙️</button>
+        </div>
+
+        <!-- STEP 8: Personal Plan Result -->
+        <div class="step text-center" data-step="8">
+            <div class="anim-zoom-in">
+                <h2>🎯 Shaxsiy rejangiz tayyor!</h2>
+                
+                <div class="result-card">
+                    <div class="result-row">
+                        <span class="label">📅 Imtihongacha:</span>
+                        <strong id="res-days">30 kun</strong>
+                    </div>
+                    <div class="divider"></div>
+                    <p class="plan-title">KUNLIK REJA</p>
+                    <div class="result-row">
+                        <span>📝 Testlar:</span>
+                        <strong>kuniga ~30 ta</strong>
+                    </div>
+                    <div class="result-row">
+                        <span>🎬 Videolar:</span>
+                        <strong>kuniga ~2 ta</strong>
+                    </div>
+                </div>
+
+                <button class="success-btn mt-4" onclick="completeApp()">🚀 Ro'yxatdan o'tish va Boshlash</button>
+            </div>
+        </div>
+
+        <!-- Dots Navigation -->
+        <div class="dots-container" id="dots">
+            <!-- Generated by JS -->
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>

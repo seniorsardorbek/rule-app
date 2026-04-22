@@ -5,6 +5,16 @@ import { store } from "../store";
 import { setCredentials, logout as logoutAction } from "../store/slices/authSlice";
 
 // Types
+export interface OnboardingData {
+  language?: string;
+  gender?: string;
+  age?: string;
+  problems?: string[];
+  daily_time?: string;
+  exam_date?: string;
+  completed_at?: string;
+}
+
 export interface User {
   id: string;
   first_name: string;
@@ -17,6 +27,7 @@ export interface User {
     city?: string;
     country?: string;
   };
+  onboarding?: OnboardingData | null;
 }
 
 export interface SignInRequest {
@@ -24,7 +35,14 @@ export interface SignInRequest {
   password: string;
 }
 
-
+export interface SignUpRequest {
+  first_name: string;
+  last_name?: string;
+  phone_number: string;
+  password: string;
+  lang?: string;
+  onboarding?: OnboardingData;
+}
 
 export interface AuthResponse {
   access_token: string;
@@ -40,12 +58,22 @@ export interface VerifyResponse {
 
 // API functions
 export const signInApi = async (data: SignInRequest): Promise<AuthResponse> => {
-
   const response = await api.post<AuthResponse>("/auth/sign-in", data);
   console.log(response.data);
   return response.data;
 };
 
+export const signUpApi = async (data: SignUpRequest): Promise<AuthResponse> => {
+  // Get onboarding data from storage if not provided
+  if (!data.onboarding) {
+    const onboardingRaw = await storage.getItem("onboarding_data");
+    if (onboardingRaw) {
+      data.onboarding = JSON.parse(onboardingRaw);
+    }
+  }
+  const response = await api.post<AuthResponse>("/auth/sign-up", data);
+  return response.data;
+};
 
 export const verifyMeApi = async (): Promise<VerifyResponse> => {
   const response = await api.get<VerifyResponse>("/auth/me");
@@ -68,6 +96,20 @@ export const useLogin = () => {
   });
 };
 
+export const useSignUp = () => {
+  return useMutation({
+    mutationFn: signUpApi,
+    onSuccess: async (data) => {
+      await storage.setItem("access_token", data.access_token);
+      store.dispatch(
+        setCredentials({
+          user: data.user,
+          token: data.access_token,
+        }),
+      );
+    },
+  });
+};
 
 export const useVerifyMe = (enabled: boolean = true) => {
   return useQuery({

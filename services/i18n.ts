@@ -17,6 +17,14 @@ const translations = {
     availableQuizzes: "Mavjud testlar",
     seeAll: "Hammasini ko'rish",
     noQuizzesYet: "Hali testlar mavjud emas",
+    todaysPerformance: "Bugungi samaradorlik",
+    questionsLower: "savol",
+    quizzesLower: "test",
+    minShort: "daq",
+    toGoal: "maqsadgacha",
+    goalReached: "Maqsadga erishildi!",
+    setDailyGoal: "Kunlik maqsadni belgilang",
+    setDailyGoalDesc: "Kuniga qancha vaqt ishlashni tanlang — biz ko'rsatkichingizni kuzatamiz",
 
     // Quiz list
     quizzes: "Testlar",
@@ -27,6 +35,20 @@ const translations = {
     noQuizzesAvailable: "Testlar mavjud emas",
     noQuizzesAvailableDesc: "Keyinroq tekshirib ko'ring",
     questions: "savol",
+    notAttempted: "Hali ishlanmagan",
+    lastAttempt: "So'nggi urinish",
+
+    // Mistakes practice
+    mistakesPractice: "Xatolar ustida ishlash",
+    mistakesPracticeDesc: "Barcha noto'g'ri javoblaringizni aralash tartibda qayta yeching",
+    practice: "Mashq qilish",
+    noMistakesYet: "Hali xatolar yo'q",
+    noMistakesYetDesc: "Bironta testni yeching, so'ng bu yerda xatolaringiz ustida ishlaysiz",
+    mistakesCount: "ta xato savol",
+    mistakesResultTitle: "Mashq natijasi",
+    corrected: "Tuzatildi",
+    stillWrong: "Hanuz xato",
+    close: "Yopish",
 
     // Quiz play
     loadingQuiz: "Test yuklanmoqda...",
@@ -94,6 +116,14 @@ const translations = {
     availableQuizzes: "Мавжуд тестлар",
     seeAll: "Ҳаммасини кўриш",
     noQuizzesYet: "Ҳали тестлар мавжуд эмас",
+    todaysPerformance: "Бугунги самарадорлик",
+    questionsLower: "савол",
+    quizzesLower: "тест",
+    minShort: "дақ",
+    toGoal: "мақсадгача",
+    goalReached: "Мақсадга эришилди!",
+    setDailyGoal: "Кунлик мақсадни белгиланг",
+    setDailyGoalDesc: "Кунига қанча вақт ишлашни танланг — биз кўрсаткичингизни кузатамиз",
 
     // Quiz list
     quizzes: "Тестлар",
@@ -104,6 +134,20 @@ const translations = {
     noQuizzesAvailable: "Тестлар мавжуд эмас",
     noQuizzesAvailableDesc: "Кейинроқ текшириб кўринг",
     questions: "савол",
+    notAttempted: "Ҳали ишланмаган",
+    lastAttempt: "Сўнгги уриниш",
+
+    // Mistakes practice
+    mistakesPractice: "Хатолар устида ишлаш",
+    mistakesPracticeDesc: "Барча нотўғри жавобларингизни аралаш тартибда қайта ечинг",
+    practice: "Машқ қилиш",
+    noMistakesYet: "Ҳали хатолар йўқ",
+    noMistakesYetDesc: "Биронта тестни ечинг, сўнг бу ерда хатоларингиз устида ишлайсиз",
+    mistakesCount: "та хато савол",
+    mistakesResultTitle: "Машқ натижаси",
+    corrected: "Тузатилди",
+    stillWrong: "Ҳануз хато",
+    close: "Ёпиш",
 
     // Quiz play
     loadingQuiz: "Тест юкланмоқда...",
@@ -171,6 +215,14 @@ const translations = {
     availableQuizzes: "Доступные тесты",
     seeAll: "Все",
     noQuizzesYet: "Тестов пока нет",
+    todaysPerformance: "Сегодняшний результат",
+    questionsLower: "вопр.",
+    quizzesLower: "тест.",
+    minShort: "мин",
+    toGoal: "до цели",
+    goalReached: "Цель достигнута!",
+    setDailyGoal: "Задайте ежедневную цель",
+    setDailyGoalDesc: "Выберите сколько времени уделять в день — мы отследим ваш прогресс",
 
     // Quiz list
     quizzes: "Тесты",
@@ -181,6 +233,20 @@ const translations = {
     noQuizzesAvailable: "Тесты недоступны",
     noQuizzesAvailableDesc: "Загляните позже",
     questions: "вопр.",
+    notAttempted: "Ещё не пройден",
+    lastAttempt: "Последняя попытка",
+
+    // Mistakes practice
+    mistakesPractice: "Работа над ошибками",
+    mistakesPracticeDesc: "Решите заново все неправильные ответы в случайном порядке",
+    practice: "Тренировать",
+    noMistakesYet: "Пока нет ошибок",
+    noMistakesYetDesc: "Пройдите любой тест — тогда здесь появятся ваши ошибки",
+    mistakesCount: "ошибочных вопр.",
+    mistakesResultTitle: "Результат тренировки",
+    corrected: "Исправлено",
+    stillWrong: "Всё ещё неверно",
+    close: "Закрыть",
 
     // Quiz play
     loadingQuiz: "Загрузка теста...",
