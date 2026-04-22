@@ -25,6 +25,9 @@ const translations = {
     goalReached: "Maqsadga erishildi!",
     setDailyGoal: "Kunlik maqsadni belgilang",
     setDailyGoalDesc: "Kuniga qancha vaqt ishlashni tanlang — biz ko'rsatkichingizni kuzatamiz",
+    daysLeft: "kun qoldi",
+    examDayToday: "Bugun imtihon kuni!",
+    setExamDate: "Imtihon sanasini belgilang",
 
     // Quiz list
     quizzes: "Testlar",
@@ -124,6 +127,9 @@ const translations = {
     goalReached: "Мақсадга эришилди!",
     setDailyGoal: "Кунлик мақсадни белгиланг",
     setDailyGoalDesc: "Кунига қанча вақт ишлашни танланг — биз кўрсаткичингизни кузатамиз",
+    daysLeft: "кун қолди",
+    examDayToday: "Бугун имтиҳон куни!",
+    setExamDate: "Имтиҳон санасини белгиланг",
 
     // Quiz list
     quizzes: "Тестлар",
@@ -223,6 +229,9 @@ const translations = {
     goalReached: "Цель достигнута!",
     setDailyGoal: "Задайте ежедневную цель",
     setDailyGoalDesc: "Выберите сколько времени уделять в день — мы отследим ваш прогресс",
+    daysLeft: "дн. осталось",
+    examDayToday: "Сегодня день экзамена!",
+    setExamDate: "Укажите дату экзамена",
 
     // Quiz list
     quizzes: "Тесты",

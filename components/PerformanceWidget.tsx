@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTodayPerformance } from "../services/quiz";
 import { useT } from "../services/i18n";
+import { colors } from "../theme/colors";
 
 interface Props {
   userId: string;
@@ -14,33 +15,33 @@ export function PerformanceWidget({ userId }: Props) {
 
   if (isLoading || !data) {
     return (
-      <View className="bg-white rounded-2xl p-5 mb-6 border border-gray-100 items-center justify-center h-32">
-        <ActivityIndicator size="small" color="#6366F1" />
+      <View className="bg-surface rounded-2xl p-5 mb-6 border border-gray-100 items-center justify-center h-32">
+        <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   }
 
-  // No goal set → CTA to onboarding
-  if (!data.goal_questions || data.goal_minutes === null) {
+  // No exam date set → CTA to onboarding
+  if (!data.goal_questions || data.days_until_exam === null) {
     return (
       <TouchableOpacity
-        className="bg-white rounded-2xl p-5 mb-6 border border-gray-100"
+        className="bg-surface rounded-2xl p-5 mb-6 border border-gray-100"
         onPress={() => router.push("/(onboarding)")}
         activeOpacity={0.8}
       >
         <View className="flex-row items-center gap-3">
-          <View className="w-12 h-12 rounded-full bg-indigo-50 items-center justify-center">
-            <Ionicons name="flag-outline" size={22} color="#6366F1" />
+          <View className="w-12 h-12 rounded-full bg-primary-50 items-center justify-center">
+            <Ionicons name="flag-outline" size={22} color={colors.primary} />
           </View>
           <View className="flex-1">
-            <Text className="text-base font-bold text-gray-900">
+            <Text className="text-base font-bold text-ink">
               {t("setDailyGoal")}
             </Text>
-            <Text className="text-gray-500 text-xs mt-0.5" numberOfLines={2}>
+            <Text className="text-ink-muted text-xs mt-0.5" numberOfLines={2}>
               {t("setDailyGoalDesc")}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
         </View>
       </TouchableOpacity>
     );
@@ -52,47 +53,45 @@ export function PerformanceWidget({ userId }: Props) {
   const { bar, text, bg, border } =
     percent >= 100
       ? {
-          bar: "bg-green-500",
-          text: "text-green-700",
-          bg: "bg-green-50",
-          border: "border-green-200",
+          bar: "bg-success",
+          text: "text-success-600",
+          bg: "bg-success-50",
+          border: "border-success-500/30",
         }
       : percent >= 60
         ? {
-            bar: "bg-indigo-500",
-            text: "text-indigo-700",
-            bg: "bg-indigo-50",
-            border: "border-indigo-200",
+            bar: "bg-primary",
+            text: "text-primary-600",
+            bg: "bg-primary-50",
+            border: "border-primary-500/30",
           }
         : {
-            bar: "bg-yellow-500",
-            text: "text-yellow-700",
-            bg: "bg-yellow-50",
-            border: "border-yellow-200",
+            bar: "bg-warning",
+            text: "text-warning-600",
+            bg: "bg-warning-50",
+            border: "border-warning-500/30",
           };
 
   return (
-    <View className="bg-white rounded-2xl p-5 mb-6 border border-gray-100">
+    <View className="bg-surface rounded-2xl p-5 mb-6 border border-gray-100">
       <View className="flex-row items-start justify-between mb-4">
         <View className="flex-1">
-          <Text className="text-[11px] uppercase tracking-wide text-gray-400 font-semibold">
+          <Text className="text-[11px] uppercase tracking-wide text-ink-muted font-semibold">
             {t("todaysPerformance")}
           </Text>
-          <Text className="text-xl font-bold text-gray-900 mt-1">
+          <Text className="text-xl font-bold text-ink mt-1">
             {data.today_questions}
-            <Text className="text-gray-400 text-base font-semibold">
+            <Text className="text-ink-muted text-base font-semibold">
               {" "}
               / {data.goal_questions}
             </Text>
-            <Text className="text-gray-500 text-sm font-medium">
+            <Text className="text-ink-muted text-sm font-medium">
               {" "}
               {t("questionsLower")}
             </Text>
           </Text>
         </View>
-        <View
-          className={`px-3 py-1.5 rounded-xl border ${bg} ${border}`}
-        >
+        <View className={`px-3 py-1.5 rounded-xl border ${bg} ${border}`}>
           <Text className={`text-lg font-bold ${text}`}>{percent}%</Text>
         </View>
       </View>
@@ -109,27 +108,27 @@ export function PerformanceWidget({ userId }: Props) {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-4">
           <View className="flex-row items-center gap-1.5">
-            <Ionicons name="time-outline" size={14} color="#6B7280" />
-            <Text className="text-xs text-gray-600 font-medium">
-              {data.goal_minutes} {t("minShort")}
+            <Ionicons name="calendar-outline" size={14} color={colors.inkMuted} />
+            <Text className="text-xs text-ink-muted font-medium">
+              {data.days_until_exam} {t("daysLeft")}
             </Text>
           </View>
           <View className="flex-row items-center gap-1.5">
-            <Ionicons name="layers-outline" size={14} color="#6B7280" />
-            <Text className="text-xs text-gray-600 font-medium">
+            <Ionicons name="layers-outline" size={14} color={colors.inkMuted} />
+            <Text className="text-xs text-ink-muted font-medium">
               ~{data.goal_quizzes} {t("quizzesLower")}
             </Text>
           </View>
         </View>
         {percent >= 100 ? (
           <View className="flex-row items-center gap-1">
-            <Ionicons name="trophy" size={14} color="#16A34A" />
-            <Text className="text-xs text-green-700 font-semibold">
+            <Ionicons name="trophy" size={14} color={colors.success} />
+            <Text className="text-xs text-success-600 font-semibold">
               {t("goalReached")}
             </Text>
           </View>
         ) : (
-          <Text className="text-xs text-gray-500 font-medium">
+          <Text className="text-xs text-ink-muted font-medium">
             {remaining} {t("toGoal")}
           </Text>
         )}

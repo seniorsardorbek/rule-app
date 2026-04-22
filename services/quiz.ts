@@ -147,8 +147,10 @@ export const getMistakesPracticeApi = async (
 };
 
 export interface TodayPerformance {
+  exam_date: string | null;
+  days_until_exam: number | null;
+  total_questions_in_bank: number;
   daily_time: string | null;
-  goal_minutes: number | null;
   goal_questions: number | null;
   goal_quizzes: number | null;
   today_questions: number;

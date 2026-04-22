@@ -28,89 +28,91 @@ export default function QuizScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-5 py-4">
-        <Text className="text-2xl font-bold text-gray-900">{t("quizzes")}</Text>
-        <Text className="text-gray-500 mt-1">{t("testYourKnowledge")}</Text>
-      </View>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-5 py-4 gap-3 pb-32"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#0088FF"
+          />
+        }
+      >
+        <View className="mb-2">
+          <Text className="text-2xl font-bold text-ink">{t("quizzes")}</Text>
+          <Text className="text-ink-muted mt-1">{t("testYourKnowledge")}</Text>
+        </View>
 
-      {isLoading && !refreshing ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#2563EB" />
-          <Text className="text-gray-500 mt-3">{t("loadingQuizzes")}</Text>
-        </View>
-      ) : error ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="wifi-outline" size={48} color="#9CA3AF" />
-          <Text className="text-gray-900 text-lg font-semibold mt-3">
-            {t("connectionError")}
-          </Text>
-          <Text className="text-gray-500 text-center mt-1">
-            {t("connectionErrorDesc")}
-          </Text>
-        </View>
-      ) : quizzes.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="document-text-outline" size={48} color="#9CA3AF" />
-          <Text className="text-gray-900 text-lg font-semibold mt-3">
-            {t("noQuizzesAvailable")}
-          </Text>
-          <Text className="text-gray-500 text-center mt-1">
-            {t("noQuizzesAvailableDesc")}
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1 px-5"
-          contentContainerClassName="gap-3 pb-32"
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#2563EB"
-            />
-          }
-        >
-          {/* Mistakes practice entry */}
-          <TouchableOpacity
-            className="rounded-2xl p-4 bg-indigo-600 shadow-sm"
-            onPress={() => router.push("/quiz/mistakes")}
-            activeOpacity={0.85}
-          >
-            <View className="flex-row items-center gap-3">
-              <View className="w-11 h-11 rounded-2xl bg-white/20 items-center justify-center">
-                <Ionicons name="flash" size={22} color="#fff" />
+        {isLoading && !refreshing ? (
+          <View className="py-16 items-center justify-center">
+            <ActivityIndicator size="large" color="#0088FF" />
+            <Text className="text-ink-muted mt-3">{t("loadingQuizzes")}</Text>
+          </View>
+        ) : error ? (
+          <View className="py-16 items-center justify-center">
+            <Ionicons name="wifi-outline" size={48} color="#BEBEBE" />
+            <Text className="text-ink text-lg font-semibold mt-3">
+              {t("connectionError")}
+            </Text>
+            <Text className="text-ink-muted text-center mt-1">
+              {t("connectionErrorDesc")}
+            </Text>
+          </View>
+        ) : quizzes.length === 0 ? (
+          <View className="py-16 items-center justify-center">
+            <Ionicons name="document-text-outline" size={48} color="#BEBEBE" />
+            <Text className="text-ink text-lg font-semibold mt-3">
+              {t("noQuizzesAvailable")}
+            </Text>
+            <Text className="text-ink-muted text-center mt-1">
+              {t("noQuizzesAvailableDesc")}
+            </Text>
+          </View>
+        ) : (
+          <>
+            {/* Mistakes practice entry */}
+            <TouchableOpacity
+              className="rounded-2xl p-4 bg-primary shadow-sm"
+              onPress={() => router.push("/quiz/mistakes")}
+              activeOpacity={0.85}
+            >
+              <View className="flex-row items-center gap-3">
+                <View className="w-11 h-11 rounded-2xl bg-white/20 items-center justify-center">
+                  <Ionicons name="flash" size={22} color="#fff" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-white font-semibold text-base">
+                    {t("mistakesPractice")}
+                  </Text>
+                  <Text className="text-primary-50 text-xs mt-0.5" numberOfLines={2}>
+                    {t("mistakesPracticeDesc")}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#E6F3FF" />
               </View>
-              <View className="flex-1">
-                <Text className="text-white font-semibold text-base">
-                  {t("mistakesPractice")}
-                </Text>
-                <Text className="text-indigo-100 text-xs mt-0.5" numberOfLines={2}>
-                  {t("mistakesPracticeDesc")}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#E0E7FF" />
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-          {quizzes.map((quiz) => {
-            const questionCount = quiz.questions?.length ?? 0;
-            return (
-              <QuizCard
-                key={quiz.id}
-                id={quiz.id}
-                name={pickLang(quiz.name_uz, quiz.name_oz, quiz.name_ru)}
-                description={quiz.description}
-                questionCount={questionCount}
-                lastResult={quiz.last_result ?? null}
-                questionsLabel={t("questions")}
-                lastAttemptLabel={t("lastAttempt")}
-                notAttemptedLabel={t("notAttempted")}
-                attemptLabel={t("attempt")}
-              />
-            );
-          })}
-        </ScrollView>
-      )}
+            {quizzes.map((quiz) => {
+              const questionCount = quiz.questions?.length ?? 0;
+              return (
+                <QuizCard
+                  key={quiz.id}
+                  id={quiz.id}
+                  name={pickLang(quiz.name_uz, quiz.name_oz, quiz.name_ru)}
+                  description={quiz.description}
+                  questionCount={questionCount}
+                  lastResult={quiz.last_result ?? null}
+                  questionsLabel={t("questions")}
+                  lastAttemptLabel={t("lastAttempt")}
+                  notAttemptedLabel={t("notAttempted")}
+                  attemptLabel={t("attempt")}
+                />
+              );
+            })}
+          </>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

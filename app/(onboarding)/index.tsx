@@ -21,6 +21,15 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TOTAL_STEPS = 8;
 
+// YYYY-MM-DD formatter using local time — <input type="date"> expects this
+// exact shape; .toISOString() would shift across timezones.
+function toDateInputValue(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 interface OnboardingAnswers {
   language?: string;
   gender?: string;
@@ -341,30 +350,66 @@ export default function OnboardingScreen() {
             <Text className="text-white/50 text-base text-center mb-8">
               Taxminiy sanani tanlang
             </Text>
-            <TouchableOpacity
-              className="bg-white/5 border border-white/20 rounded-2xl p-4 mb-4"
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text className="text-white text-base text-center font-medium">
-                📅 {examDate.toLocaleDateString("uz-UZ", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={examDate}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                minimumDate={new Date()}
-                themeVariant="dark"
-                onChange={(event, date) => {
-                  setShowDatePicker(Platform.OS === "ios");
-                  if (date) setExamDate(date);
-                }}
-              />
+            {Platform.OS === "web" ? (
+              <View className="bg-white/5 border border-white/20 rounded-2xl p-4 mb-4 relative">
+                <Text className="text-white text-base text-center font-medium">
+                  📅 {examDate.toLocaleDateString("uz-UZ", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </Text>
+                {/* Transparent native date input overlaid on the pill —
+                    @react-native-community/datetimepicker doesn't work on web. */}
+                <input
+                  type="date"
+                  value={toDateInputValue(examDate)}
+                  min={toDateInputValue(new Date())}
+                  onChange={(e) => {
+                    const v = e.currentTarget.value;
+                    if (v) setExamDate(new Date(v));
+                  }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    opacity: 0,
+                    width: "100%",
+                    height: "100%",
+                    cursor: "pointer",
+                    border: "none",
+                    background: "transparent",
+                    colorScheme: "dark",
+                  }}
+                />
+              </View>
+            ) : (
+              <>
+                <TouchableOpacity
+                  className="bg-white/5 border border-white/20 rounded-2xl p-4 mb-4"
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text className="text-white text-base text-center font-medium">
+                    📅 {examDate.toLocaleDateString("uz-UZ", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={examDate}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    minimumDate={new Date()}
+                    themeVariant="dark"
+                    onChange={(_event, date) => {
+                      setShowDatePicker(Platform.OS === "ios");
+                      if (date) setExamDate(date);
+                    }}
+                  />
+                )}
+              </>
             )}
             <View className="mt-auto">
               <PrimaryButton label="Rejani hisoblash ⚙️" onPress={finishDate} />

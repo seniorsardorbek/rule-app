@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../theme/colors";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -10,9 +11,6 @@ const TAB_ICONS: Record<string, { active: IconName; inactive: IconName }> = {
   quiz: { active: "reader", inactive: "reader-outline" },
   profile: { active: "person", inactive: "person-outline" },
 };
-
-const ACTIVE_COLOR = "#100910";
-const INACTIVE_COLOR = "#BEBEBE";
 
 export function AnimatedTabBar({
   state,
@@ -67,12 +65,12 @@ export function AnimatedTabBar({
               <Ionicons
                 name={iconName}
                 size={24}
-                color={focused ? ACTIVE_COLOR : INACTIVE_COLOR}
+                color={focused ? colors.primary : colors.inkMuted}
               />
               <Text
                 style={[
                   styles.label,
-                  { color: focused ? ACTIVE_COLOR : INACTIVE_COLOR },
+                  { color: focused ? colors.primary : colors.inkMuted },
                 ]}
                 numberOfLines={1}
               >
@@ -86,9 +84,9 @@ export function AnimatedTabBar({
   );
 }
 
-const BAR_HEIGHT = 68;
-const PILL_HEIGHT = 44;
-const PILL_WIDTH = 70;
+const BAR_HEIGHT = 78;
+const PILL_HEIGHT = 56;
+const PILL_WIDTH = 80;
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -101,13 +99,13 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: "row",
     width: "92%",
-    maxWidth: 360,
+    maxWidth: 400,
     height: BAR_HEIGHT,
     borderRadius: 34,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     alignItems: "center",
     paddingHorizontal: 8,
-    shadowColor: "#000",
+    shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -125,9 +123,9 @@ const styles = StyleSheet.create({
     top: (BAR_HEIGHT - PILL_HEIGHT) / 2,
     width: PILL_WIDTH,
     height: PILL_HEIGHT,
-    borderRadius: 22,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
+    borderRadius: 36,
+    backgroundColor: colors.surface,
+    shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 10,
