@@ -3,13 +3,15 @@ import { storage } from "./storage";
 import { router } from "expo-router";
 import Constants from "expo-constants";
 
-// Extract the laptop's IP dynamically during development so it works across changing Wi-Fi networks
-// hostUri typically looks like "192.168.x.x:8081"
+// In production, EXPO_PUBLIC_* env vars are baked into the bundle.
+// In dev, fall back to the laptop IP from Expo's hostUri so devices on the LAN can reach it.
 const hostUri = Constants.expoConfig?.hostUri;
 const localIp = hostUri ? hostUri.split(":")[0] : "localhost";
 
-const API_BASE_URL = `http://${localIp}:4000/api`;
-const FILE_BASE_URL = `http://${localIp}:4000`;
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? `http://${localIp}:4000/api`;
+const FILE_BASE_URL =
+  process.env.EXPO_PUBLIC_FILE_URL ?? `http://${localIp}:4000`;
 
 // Helper to get full file URL (without /api prefix)
 export const getFileUrl = (url: string): string => {

@@ -12,7 +12,11 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.rule-auto.uz/api",
+        "EXPO_PUBLIC_FILE_URL": "https://api.rule-auto.uz"
+      }
     }
   },
   "submit": {
