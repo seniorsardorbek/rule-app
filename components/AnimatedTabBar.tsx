@@ -1,7 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../theme/colors";
+import { LinearGradient } from "expo-linear-gradient";
+import { useThemeColors } from "../theme/colors";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -17,9 +18,20 @@ export function AnimatedTabBar({
   descriptors,
   navigation,
 }: BottomTabBarProps) {
+  const c = useThemeColors();
+
   return (
     <View style={styles.wrapper} pointerEvents="box-none">
-      <View style={styles.bar}>
+      <View
+        style={[
+          styles.bar,
+          {
+            backgroundColor: c.surface,
+            borderColor: c.border,
+            shadowColor: c.ink,
+          },
+        ]}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const focused = state.index === index;
@@ -60,22 +72,25 @@ export function AnimatedTabBar({
               android_ripple={{ borderless: true }}
             >
               {focused ? (
-                <View style={styles.activePill} pointerEvents="none" />
-              ) : null}
-              <Ionicons
-                name={iconName}
-                size={24}
-                color={focused ? colors.primary : colors.inkMuted}
-              />
-              <Text
-                style={[
-                  styles.label,
-                  { color: focused ? colors.primary : colors.inkMuted },
-                ]}
-                numberOfLines={1}
-              >
-                {label}
-              </Text>
+                <LinearGradient
+                  colors={[c.primary, c.primaryDeep]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[
+                    styles.activePill,
+                    { shadowColor: c.primary },
+                  ]}
+                >
+                  <Ionicons name={iconName} size={18} color="#fff" />
+                  <Text style={styles.activeLabel} numberOfLines={1}>
+                    {label}
+                  </Text>
+                </LinearGradient>
+              ) : (
+                <View style={styles.inactiveCircle}>
+                  <Ionicons name={iconName} size={22} color={c.inkMuted} />
+                </View>
+              )}
             </Pressable>
           );
         })}
@@ -84,56 +99,59 @@ export function AnimatedTabBar({
   );
 }
 
-const BAR_HEIGHT = 78;
-const PILL_HEIGHT = 56;
-const PILL_WIDTH = 80;
+const BAR_HEIGHT = 64;
 
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 24,
+    left: 20,
+    right: 20,
+    bottom: 18,
     alignItems: "center",
   },
   bar: {
     flexDirection: "row",
-    width: "92%",
-    maxWidth: 400,
+    width: "100%",
     height: BAR_HEIGHT,
-    borderRadius: 34,
-    backgroundColor: colors.surface,
+    borderRadius: 999,
     alignItems: "center",
-    paddingHorizontal: 8,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.14,
+    shadowRadius: 40,
     elevation: 8,
   },
   tab: {
     flex: 1,
-    height: "100%",
+    height: 48,
     alignItems: "center",
     justifyContent: "center",
-    position: "relative",
   },
   activePill: {
-    position: "absolute",
-    top: (BAR_HEIGHT - PILL_HEIGHT) / 2,
-    width: PILL_WIDTH,
-    height: PILL_HEIGHT,
-    borderRadius: 36,
-    backgroundColor: colors.surface,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 44,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    gap: 7,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 6,
   },
-  label: {
-    fontSize: 10,
-    fontWeight: "500",
-    marginTop: 3,
+  activeLabel: {
+    color: "#fff",
+    fontSize: 12.5,
+    fontWeight: "700",
+    letterSpacing: -0.1,
+  },
+  inactiveCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

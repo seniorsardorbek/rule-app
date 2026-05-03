@@ -12,7 +12,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "AI kuzatuv",
+          title: "",
         }}
       />
       <Tabs.Screen

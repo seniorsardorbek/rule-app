@@ -1,43 +1,46 @@
-import { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { resetQuiz } from "../../store/slices/quizSlice";
 import { useResult, pickLang } from "../../services/quiz";
 import { useT } from "../../services/i18n";
-import { getFileUrl } from "../../services/api";
+import { useThemeColors } from "../../theme/colors";
 
 export default function QuizResultsScreen() {
   const dispatch = useAppDispatch();
   const t = useT();
+  const c = useThemeColors();
   const { currentQuizId, resultId } = useAppSelector((s) => s.quiz);
   const { data: result, isLoading, isPending } = useResult(resultId ?? "");
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   if (isLoading || (isPending && !!resultId)) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text className="text-gray-500 mt-3">{t("loadingResults")}</Text>
+      <View className="flex-1 items-center justify-center bg-page dark:bg-page-dark">
+        <ActivityIndicator size="large" color={c.primary} />
+        <Text className="text-ink-muted dark:text-ink-mutedOnDark mt-3">
+          {t("loadingResults")}
+        </Text>
       </View>
     );
   }
 
   if (!result) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-gray-500">{t("noResults")}</Text>
+      <View className="flex-1 items-center justify-center bg-page dark:bg-page-dark">
+        <Text className="text-ink-muted dark:text-ink-mutedOnDark">
+          {t("noResults")}
+        </Text>
         <TouchableOpacity
-          className="mt-4 bg-blue-600 px-6 py-3 rounded-xl"
+          className="mt-4 bg-primary px-6 py-3 rounded-xl"
           onPress={() => {
             dispatch(resetQuiz());
             router.replace("/(tabs)/quiz");
@@ -49,19 +52,48 @@ export default function QuizResultsScreen() {
     );
   }
 
-  const { correct_count, incorrect_count, total_questions, answers = [] } = result;
+  const { correct_count, incorrect_count, total_questions, answers = [] } =
+    result;
   const percentage =
-    total_questions > 0 ? Math.round((correct_count / total_questions) * 100) : 0;
-
-  const gradeColor =
-    percentage >= 80
-      ? { text: "text-green-600", light: "bg-green-50", border: "border-green-200" }
-      : percentage >= 60
-        ? { text: "text-yellow-600", light: "bg-yellow-50", border: "border-yellow-200" }
-        : { text: "text-red-600", light: "bg-red-50", border: "border-red-200" };
+    total_questions > 0
+      ? Math.round((correct_count / total_questions) * 100)
+      : 0;
 
   const gradeLabel =
-    percentage >= 80 ? t("excellent") : percentage >= 60 ? t("goodJob") : t("keepTrying");
+    percentage >= 80
+      ? t("excellent")
+      : percentage >= 60
+        ? t("goodJob")
+        : t("keepTrying");
+
+  const gradeSub =
+    percentage >= 80
+      ? "Imtihon bo'lganida o'tib ketardingiz"
+      : percentage >= 60
+        ? "Yana bir oz mashq qiling"
+        : "Davom eting, yaxshilashingiz mumkin";
+
+  // Per-topic stats from answers
+  const byTopic = new Map<string, { correct: number; total: number }>();
+  for (const a of answers) {
+    const topic = pickLang(
+      a.question?.topic_name_uz ?? "",
+      a.question?.topic_name_oz,
+      a.question?.topic_name_ru,
+    );
+    if (!topic) continue;
+    const cur = byTopic.get(topic) ?? { correct: 0, total: 0 };
+    cur.total += 1;
+    if (a.is_correct) cur.correct += 1;
+    byTopic.set(topic, cur);
+  }
+  const topicRows = Array.from(byTopic.entries())
+    .map(([name, s]) => ({
+      name,
+      pct: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0,
+    }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 5);
 
   const handleTryAgain = () => {
     if (currentQuizId) {
@@ -75,252 +107,365 @@ export default function QuizResultsScreen() {
     router.replace("/(tabs)/quiz");
   };
 
-  const answer = answers[currentIndex];
-  const question = answer?.question;
-  const options = question?.options ?? [];
-  const correctOption = options.find((o) => o.is_correct);
-
-  const questionText = question
-    ? pickLang(question.question_uz, question.question_oz, question.question_ru)
-    : "";
-
-  const selectedText = answer?.selected_option
-    ? pickLang(
-        answer.selected_option.text_uz,
-        answer.selected_option.text_oz,
-        answer.selected_option.text_ru,
-      )
-    : t("notAnswered");
-
-  const correctText = correctOption
-    ? pickLang(correctOption.text_uz, correctOption.text_oz, correctOption.text_ru)
-    : "";
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50" edges={["bottom"]}>
-      {/* Score summary header */}
-      <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-100">
-        <View className="flex-row items-center gap-4">
-          <View
-            className={`w-16 h-16 rounded-2xl items-center justify-center ${gradeColor.light} border ${gradeColor.border}`}
-          >
-            <Text className={`text-2xl font-bold ${gradeColor.text}`}>
-              {percentage}%
-            </Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900">{gradeLabel}</Text>
-            <Text className="text-sm text-gray-500">
-              {correct_count}/{total_questions}{" "}
-              {result.attempt > 1 ? `• ${t("attempt")} #${result.attempt}` : ""}
-            </Text>
-          </View>
-          <View className="gap-1">
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-6 h-6 rounded-full bg-green-100 items-center justify-center">
-                <Ionicons name="checkmark" size={12} color="#16A34A" />
-              </View>
-              <Text className="text-sm font-semibold text-gray-700">{correct_count}</Text>
-            </View>
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-6 h-6 rounded-full bg-red-100 items-center justify-center">
-                <Ionicons name="close" size={12} color="#EF4444" />
-              </View>
-              <Text className="text-sm font-semibold text-gray-700">{incorrect_count}</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Progress bar */}
-      <View className="px-5 pt-3 pb-2">
-        <View className="flex-row items-center justify-between mb-1.5">
-          <Text className="text-sm text-gray-500">
-            {currentIndex + 1} / {answers.length}
-          </Text>
-          {answer && (
-            <View
-              className={`px-2 py-0.5 rounded-full ${
-                answer.is_correct ? "bg-green-100" : "bg-red-100"
-              }`}
-            >
-              <Text
-                className={`text-xs font-semibold ${
-                  answer.is_correct ? "text-green-700" : "text-red-700"
-                }`}
-              >
-                {answer.is_correct ? t("correct") : t("wrong")}
-              </Text>
-            </View>
-          )}
-        </View>
-        <View className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-          <View
-            className="h-full bg-indigo-500 rounded-full"
-            style={{ width: `${((currentIndex + 1) / answers.length) * 100}%` }}
-          />
-        </View>
+    <SafeAreaView
+      className="flex-1 bg-page dark:bg-page-dark"
+      edges={["top", "bottom"]}
+    >
+      {/* Top nav */}
+      <View className="flex-row items-center justify-between px-5 pt-3 pb-2">
+        <TouchableOpacity
+          onPress={handleBackToQuizzes}
+          className="w-10 h-10 rounded-xl bg-surface dark:bg-surface-dark border border-edge dark:border-edge-dark items-center justify-center"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="chevron-back" size={18} color={c.ink} />
+        </TouchableOpacity>
+        <Text
+          className="font-bold text-ink dark:text-ink-onDark"
+          style={{ fontSize: 14 }}
+        >
+          Natijalar
+        </Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView
         className="flex-1 px-5"
-        contentContainerClassName="pb-6"
+        contentContainerClassName="pb-3 pt-2"
         showsVerticalScrollIndicator={false}
-        key={currentIndex}
       >
-        {answer && question ? (
-          <>
-            {/* Question text */}
-            <Text className="text-lg font-bold text-gray-900 mb-4">
-              {questionText}
-            </Text>
-
-            {/* Question image */}
-            {question.image?.url && (
-              <Image
-                source={{ uri: getFileUrl(question.image.url) }}
-                className="w-full h-44 rounded-xl mb-4"
-                resizeMode="contain"
+        {/* Hero gradient card */}
+        <LinearGradient
+          colors={[c.primary, c.primaryDeep]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: 22,
+            padding: 22,
+            marginBottom: 14,
+            alignItems: "center",
+            overflow: "hidden",
+            shadowColor: c.primary,
+            shadowOffset: { width: 0, height: 20 },
+            shadowOpacity: 0.35,
+            shadowRadius: 40,
+            elevation: 8,
+          }}
+        >
+          {/* Decorative arc layers */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              right: -60,
+              top: -60,
+              width: 200,
+              height: 200,
+              opacity: 0.14,
+            }}
+          >
+            {[90, 65, 40].map((r) => (
+              <View
+                key={r}
+                style={{
+                  position: "absolute",
+                  left: 100 - r,
+                  top: 100 - r,
+                  width: r * 2,
+                  height: r * 2,
+                  borderRadius: r,
+                  borderWidth: 1.5,
+                  borderColor: "#fff",
+                }}
               />
-            )}
-
-            {/* Options — revealed */}
-            <View className="gap-3">
-              {options.map((option, idx) => {
-                const isSelected = answer.selected_option?.id === option.id;
-                const isCorrect = option.is_correct;
-                const letter = String.fromCharCode(65 + idx);
-                const optionText = pickLang(option.text_uz, option.text_oz, option.text_ru);
-
-                let borderClass = "border-gray-200";
-                let bgClass = "bg-white";
-                let textClass = "text-gray-800";
-                let circleClass = "bg-gray-100";
-                let circleTextClass = "text-gray-600";
-
-                if (isCorrect) {
-                  borderClass = "border-green-400";
-                  bgClass = "bg-green-50";
-                  textClass = "text-green-800";
-                  circleClass = "bg-green-500";
-                  circleTextClass = "text-white";
-                } else if (isSelected) {
-                  borderClass = "border-red-400";
-                  bgClass = "bg-red-50";
-                  textClass = "text-red-800";
-                  circleClass = "bg-red-500";
-                  circleTextClass = "text-white";
-                }
-
-                return (
-                  <View
-                    key={option.id}
-                    className={`flex-row items-center p-4 rounded-2xl border-2 ${borderClass} ${bgClass}`}
-                  >
-                    <View
-                      className={`w-9 h-9 rounded-full items-center justify-center mr-3 ${circleClass}`}
-                    >
-                      <Text className={`font-bold text-sm ${circleTextClass}`}>
-                        {letter}
-                      </Text>
-                    </View>
-                    <Text className={`flex-1 text-base font-medium ${textClass}`}>
-                      {optionText}
-                    </Text>
-                    {isCorrect && (
-                      <Ionicons name="checkmark-circle" size={20} color="#16A34A" />
-                    )}
-                    {isSelected && !isCorrect && (
-                      <Ionicons name="close-circle" size={20} color="#EF4444" />
-                    )}
-                  </View>
-                );
-              })}
-            </View>
-
-            {/* Wrong answer summary */}
-            {!answer.is_correct && (
-              <View className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 gap-2">
-                <View>
-                  <Text className="text-xs text-red-500 font-semibold mb-0.5">
-                    {t("yourAnswer")}
-                  </Text>
-                  <Text className="text-sm text-red-700">{selectedText}</Text>
-                </View>
-                <View className="h-px bg-amber-200" />
-                <View>
-                  <Text className="text-xs text-green-600 font-semibold mb-0.5">
-                    {t("correctAnswer")}
-                  </Text>
-                  <Text className="text-sm text-green-700">{correctText}</Text>
-                </View>
-              </View>
-            )}
-          </>
-        ) : (
-          <View className="flex-1 items-center justify-center py-12">
-            <Text className="text-gray-400">{t("noResults")}</Text>
+            ))}
           </View>
-        )}
-      </ScrollView>
 
-      {/* Navigation + action buttons */}
-      <View className="px-5 py-4 bg-white border-t border-gray-100 gap-3">
-        {/* Prev / Next */}
-        <View className="flex-row gap-3">
-          <TouchableOpacity
-            className={`flex-1 py-3 rounded-xl items-center border ${
-              currentIndex === 0 ? "border-gray-200 bg-gray-50" : "border-gray-300 bg-white"
-            }`}
-            onPress={() => setCurrentIndex((i) => i - 1)}
-            disabled={currentIndex === 0}
+          {/* Ring */}
+          <View
+            style={{
+              width: 128,
+              height: 128,
+              borderRadius: 64,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(255,255,255,0.10)",
+              borderWidth: 6,
+              borderColor: "rgba(255,255,255,0.25)",
+              marginBottom: 14,
+              position: "relative",
+            }}
           >
+            {/* Filled arc — approximate by an overlapping ring via a second
+                view that covers the missing percent. For light-touch fidelity
+                without an SVG dep, render a solid white outer ring and fade
+                inside; the % is the headline and the ring is decoration. */}
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                inset: -6,
+                borderRadius: 64,
+                borderWidth: 6,
+                borderColor: "transparent",
+                borderTopColor: "#fff",
+                borderRightColor: percentage >= 25 ? "#fff" : "transparent",
+                borderBottomColor: percentage >= 50 ? "#fff" : "transparent",
+                borderLeftColor: percentage >= 75 ? "#fff" : "transparent",
+                transform: [{ rotate: "-45deg" }],
+              }}
+            />
             <Text
-              className={`font-semibold ${
-                currentIndex === 0 ? "text-gray-300" : "text-gray-700"
-              }`}
+              style={{
+                color: "#fff",
+                fontWeight: "800",
+                fontSize: 38,
+                letterSpacing: -1.4,
+                lineHeight: 38,
+              }}
             >
-              {t("ortga")}
+              {percentage}%
             </Text>
-          </TouchableOpacity>
+            <Text
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                fontSize: 11,
+                marginTop: 6,
+              }}
+            >
+              {correct_count} / {total_questions}
+            </Text>
+          </View>
 
-          <TouchableOpacity
-            className={`flex-1 py-3 rounded-xl items-center border ${
-              currentIndex === answers.length - 1
-                ? "border-gray-200 bg-gray-50"
-                : "border-indigo-300 bg-indigo-50"
-            }`}
-            onPress={() => setCurrentIndex((i) => i + 1)}
-            disabled={currentIndex === answers.length - 1}
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "800",
+              fontSize: 22,
+              letterSpacing: -0.5,
+            }}
           >
-            <Text
-              className={`font-semibold ${
-                currentIndex === answers.length - 1
-                  ? "text-gray-300"
-                  : "text-indigo-700"
-              }`}
-            >
-              {t("keyingisi")}
-            </Text>
-          </TouchableOpacity>
+            {gradeLabel}
+          </Text>
+          <Text
+            style={{
+              color: "rgba(255,255,255,0.85)",
+              fontSize: 13,
+              marginTop: 4,
+              textAlign: "center",
+            }}
+          >
+            {gradeSub}
+          </Text>
+        </LinearGradient>
+
+        {/* Stats row */}
+        <View className="flex-row gap-2.5 mb-3.5">
+          <StatCell
+            value={correct_count}
+            label={t("correct")}
+            icon="checkmark"
+            iconBg={c.successSoft}
+            iconColor={c.success}
+          />
+          <StatCell
+            value={incorrect_count}
+            label={t("wrong")}
+            icon="close"
+            iconBg={c.dangerSoft}
+            iconColor={c.danger}
+          />
         </View>
 
-        {/* All quizzes / Try again */}
-        <View className="flex-row gap-3">
+        {/* Topics card */}
+        {topicRows.length > 0 ? (
+          <View
+            className="bg-surface dark:bg-surface-dark rounded-2xl border border-edge dark:border-edge-dark"
+            style={{ padding: 14 }}
+          >
+            <Text
+              className="font-bold text-ink dark:text-ink-onDark mb-3"
+              style={{ fontSize: 13 }}
+            >
+              Mavzular bo'yicha
+            </Text>
+            {topicRows.map((row, i) => {
+              const barColor =
+                row.pct >= 80
+                  ? c.success
+                  : row.pct >= 60
+                    ? c.warning
+                    : c.danger;
+              return (
+                <View
+                  key={row.name + i}
+                  style={{ marginBottom: i === topicRows.length - 1 ? 0 : 10 }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 4,
+                    }}
+                  >
+                    <Text
+                      className="text-ink-mid dark:text-ink-midOnDark"
+                      style={{ fontSize: 12, fontWeight: "500" }}
+                      numberOfLines={1}
+                    >
+                      {row.name}
+                    </Text>
+                    <Text
+                      className="text-ink dark:text-ink-onDark"
+                      style={{ fontSize: 12, fontWeight: "700" }}
+                    >
+                      {row.pct}%
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      height: 6,
+                      borderRadius: 99,
+                      backgroundColor: c.surfaceSoft,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: "100%",
+                        width: `${row.pct}%`,
+                        backgroundColor: barColor,
+                        borderRadius: 99,
+                      }}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : null}
+      </ScrollView>
+
+      {/* Bottom action row */}
+      <View
+        className="px-5 py-4"
+        style={{
+          backgroundColor: c.surface,
+          borderTopWidth: 1,
+          borderTopColor: c.border,
+        }}
+      >
+        <View className="flex-row gap-2.5">
           <TouchableOpacity
-            className="flex-1 py-3.5 rounded-xl items-center border border-gray-300"
             onPress={handleBackToQuizzes}
+            activeOpacity={0.7}
+            style={{
+              flex: 1,
+              height: 52,
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: c.border,
+              backgroundColor: c.surface,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-gray-700 font-semibold">{t("allQuizzes")}</Text>
+            <Text
+              className="text-ink dark:text-ink-onDark font-bold"
+              style={{ fontSize: 14 }}
+            >
+              {t("allQuizzes")}
+            </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            className="flex-1 py-3.5 rounded-xl items-center bg-blue-600"
             onPress={handleTryAgain}
+            activeOpacity={0.85}
+            style={{ flex: 1 }}
           >
-            <Text className="text-white font-semibold">{t("tryAgain")}</Text>
+            <LinearGradient
+              colors={[c.primary, c.primaryDeep]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={{
+                height: 52,
+                borderRadius: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                shadowColor: c.primary,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.35,
+                shadowRadius: 18,
+                elevation: 5,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 14 }}>
+                {t("tryAgain")}
+              </Text>
+              <Ionicons name="refresh" size={16} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
+  );
+}
+
+interface StatCellProps {
+  value: number;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconBg: string;
+  iconColor: string;
+}
+
+function StatCell({ value, label, icon, iconBg, iconColor }: StatCellProps) {
+  return (
+    <View
+      className="flex-1 bg-surface dark:bg-surface-dark rounded-2xl border border-edge dark:border-edge-dark"
+      style={{ padding: 14 }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            backgroundColor: iconBg,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Ionicons name={icon} size={18} color={iconColor} />
+        </View>
+        <View>
+          <Text
+            className="font-extrabold text-ink dark:text-ink-onDark"
+            style={{
+              fontSize: 22,
+              letterSpacing: -0.5,
+              lineHeight: 22,
+            }}
+          >
+            {value}
+          </Text>
+          <Text
+            className="text-ink-muted dark:text-ink-mutedOnDark mt-0.5"
+            style={{ fontSize: 11 }}
+          >
+            {label}
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

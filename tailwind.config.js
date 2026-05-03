@@ -15,6 +15,7 @@ module.exports = {
           500: "#0088FF",
           600: "#006FD1",
           700: "#0056A3",
+          deep: "#0064D6",
         },
         info: {
           DEFAULT: "#00C0E8",
@@ -40,12 +41,31 @@ module.exports = {
           500: "#F56F72",
           600: "#E84146",
         },
+        // Page bg paired with dark equivalent.
+        page: {
+          DEFAULT: "#F4F6FB",
+          dark: "#0A0E1A",
+        },
         ink: {
           DEFAULT: "#100910",
+          mid: "#3B4252",
           muted: "#BEBEBE",
+          dim: "#AFB7C7",
+          // dark-mode pairings
+          onDark: "#F2F4FA",
+          midOnDark: "#C7CEDB",
+          mutedOnDark: "#7B86A8",
+          dimOnDark: "#5C667C",
         },
         surface: {
           DEFAULT: "#FFFFFF",
+          soft: "#F4F6FB",
+          dark: "#161B2E",
+          softDark: "#1A2138",
+        },
+        edge: {
+          DEFAULT: "rgba(15,25,55,0.08)",
+          dark: "rgba(255,255,255,0.08)",
         },
       },
     },

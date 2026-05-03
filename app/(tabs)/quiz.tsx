@@ -8,14 +8,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useQuizzes, pickLang, type QuizLastResult } from "../../services/quiz";
 import { useT } from "../../services/i18n";
-import { useState, useCallback } from "react";
+import { useThemeColors } from "../../theme/colors";
+import { useState, useCallback, useMemo } from "react";
+
+type Filter = "all" | "new" | "incomplete" | "high";
 
 export default function QuizScreen() {
   const t = useT();
+  const colors = useThemeColors();
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<Filter>("all");
   const { data, isLoading, error, refetch } = useQuizzes({ limit: 1000 });
 
   const onRefresh = useCallback(async () => {
@@ -24,10 +30,40 @@ export default function QuizScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  const quizzes = data?.data ?? [];
+  const allQuizzes = data?.data ?? [];
+  const quizzes = useMemo(() => {
+    if (filter === "all") return allQuizzes;
+    if (filter === "new") return allQuizzes.filter((q) => !q.last_result);
+    if (filter === "incomplete")
+      return allQuizzes.filter((q) => {
+        const lr = q.last_result;
+        if (!lr) return true;
+        return (
+          lr.total_questions > 0 &&
+          lr.correct_count / lr.total_questions < 0.9
+        );
+      });
+    if (filter === "high")
+      return allQuizzes.filter((q) => {
+        const lr = q.last_result;
+        return (
+          lr &&
+          lr.total_questions > 0 &&
+          lr.correct_count / lr.total_questions >= 0.9
+        );
+      });
+    return allQuizzes;
+  }, [allQuizzes, filter]);
+
+  const FILTERS: { key: Filter; label: string }[] = [
+    { key: "all", label: "Hammasi" },
+    { key: "new", label: "Yangi" },
+    { key: "incomplete", label: "Tugatilmagan" },
+    { key: "high", label: "90%+" },
+  ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-page dark:bg-page-dark">
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-5 py-4 gap-3 pb-32"
@@ -35,63 +71,200 @@ export default function QuizScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#0088FF"
+            tintColor={colors.primary}
           />
         }
       >
-        <View className="mb-2">
-          <Text className="text-2xl font-bold text-ink">{t("quizzes")}</Text>
-          <Text className="text-ink-muted mt-1">{t("testYourKnowledge")}</Text>
+        <View className="mb-1 mt-1">
+          <Text
+            className="font-extrabold text-ink dark:text-ink-onDark"
+            style={{ fontSize: 28, letterSpacing: -0.5 }}
+          >
+            {t("quizzes")}
+          </Text>
+          <Text className="text-ink-muted dark:text-ink-mutedOnDark text-[13px] mt-1">
+            {t("testYourKnowledge")}
+          </Text>
         </View>
 
         {isLoading && !refreshing ? (
           <View className="py-16 items-center justify-center">
-            <ActivityIndicator size="large" color="#0088FF" />
-            <Text className="text-ink-muted mt-3">{t("loadingQuizzes")}</Text>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text className="text-ink-muted dark:text-ink-mutedOnDark mt-3">
+              {t("loadingQuizzes")}
+            </Text>
           </View>
         ) : error ? (
           <View className="py-16 items-center justify-center">
-            <Ionicons name="wifi-outline" size={48} color="#BEBEBE" />
-            <Text className="text-ink text-lg font-semibold mt-3">
+            <Ionicons name="wifi-outline" size={48} color={colors.inkMuted} />
+            <Text className="text-ink dark:text-ink-onDark text-lg font-semibold mt-3">
               {t("connectionError")}
             </Text>
-            <Text className="text-ink-muted text-center mt-1">
+            <Text className="text-ink-muted dark:text-ink-mutedOnDark text-center mt-1">
               {t("connectionErrorDesc")}
             </Text>
           </View>
-        ) : quizzes.length === 0 ? (
+        ) : allQuizzes.length === 0 ? (
           <View className="py-16 items-center justify-center">
-            <Ionicons name="document-text-outline" size={48} color="#BEBEBE" />
-            <Text className="text-ink text-lg font-semibold mt-3">
+            <Ionicons name="document-text-outline" size={48} color={colors.inkMuted} />
+            <Text className="text-ink dark:text-ink-onDark text-lg font-semibold mt-3">
               {t("noQuizzesAvailable")}
             </Text>
-            <Text className="text-ink-muted text-center mt-1">
+            <Text className="text-ink-muted dark:text-ink-mutedOnDark text-center mt-1">
               {t("noQuizzesAvailableDesc")}
             </Text>
           </View>
         ) : (
           <>
-            {/* Mistakes practice entry */}
+            {/* Exam mode — primary gradient CTA */}
             <TouchableOpacity
-              className="rounded-2xl p-4 bg-primary shadow-sm"
+              onPress={() => router.push("/exam")}
+              activeOpacity={0.85}
+            >
+              <LinearGradient
+                colors={[colors.primary, colors.primaryDeep]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  borderRadius: 20,
+                  padding: 18,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                  overflow: "hidden",
+                  shadowColor: colors.primary,
+                  shadowOffset: { width: 0, height: 16 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 40,
+                  elevation: 6,
+                }}
+              >
+                <View
+                  className="w-12 h-12 rounded-2xl items-center justify-center"
+                  style={{ backgroundColor: "rgba(255,255,255,0.22)" }}
+                >
+                  <Ionicons name="timer" size={22} color="#fff" />
+                </View>
+                <View className="flex-1">
+                  <Text
+                    className="text-white font-extrabold"
+                    style={{ fontSize: 15, letterSpacing: -0.3 }}
+                  >
+                    {t("examMode")}
+                  </Text>
+                  <Text
+                    className="text-white/90 mt-1"
+                    style={{ fontSize: 12, lineHeight: 16 }}
+                    numberOfLines={2}
+                  >
+                    {t("examModeDesc")}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#fff" />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Mistakes practice — vibrant danger gradient */}
+            <TouchableOpacity
               onPress={() => router.push("/quiz/mistakes")}
               activeOpacity={0.85}
             >
-              <View className="flex-row items-center gap-3">
-                <View className="w-11 h-11 rounded-2xl bg-white/20 items-center justify-center">
-                  <Ionicons name="flash" size={22} color="#fff" />
+              <LinearGradient
+                colors={[colors.danger, colors.dangerDeep]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  borderRadius: 20,
+                  padding: 18,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                  overflow: "hidden",
+                  shadowColor: colors.dangerDeep,
+                  shadowOffset: { width: 0, height: 16 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 40,
+                  elevation: 6,
+                }}
+              >
+                <View
+                  className="w-12 h-12 rounded-2xl items-center justify-center"
+                  style={{ backgroundColor: "rgba(255,255,255,0.22)" }}
+                >
+                  <Ionicons name="flame" size={22} color="#fff" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-white font-semibold text-base">
+                  <Text
+                    className="text-white font-extrabold"
+                    style={{ fontSize: 15, letterSpacing: -0.3 }}
+                  >
                     {t("mistakesPractice")}
                   </Text>
-                  <Text className="text-primary-50 text-xs mt-0.5" numberOfLines={2}>
+                  <Text
+                    className="text-white/90 mt-1"
+                    style={{ fontSize: 12, lineHeight: 16 }}
+                    numberOfLines={2}
+                  >
                     {t("mistakesPracticeDesc")}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#E6F3FF" />
-              </View>
+                <Ionicons name="chevron-forward" size={18} color="#fff" />
+              </LinearGradient>
             </TouchableOpacity>
+
+            {/* Filter chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+            >
+              {FILTERS.map((f) => {
+                const active = filter === f.key;
+                return (
+                  <TouchableOpacity
+                    key={f.key}
+                    onPress={() => setFilter(f.key)}
+                    activeOpacity={0.8}
+                    className={`rounded-full border ${
+                      active
+                        ? "bg-primary border-transparent"
+                        : "bg-surface dark:bg-surface-dark border-edge dark:border-edge-dark"
+                    }`}
+                    style={{
+                      paddingHorizontal: 14,
+                      paddingVertical: 7,
+                      shadowColor: active ? colors.primary : "transparent",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: active ? 0.25 : 0,
+                      shadowRadius: 10,
+                      elevation: active ? 3 : 0,
+                    }}
+                  >
+                    <Text
+                      className={`font-semibold ${
+                        active ? "text-white" : "text-ink-mid dark:text-ink-midOnDark"
+                      }`}
+                      style={{ fontSize: 12.5 }}
+                    >
+                      {f.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {quizzes.length === 0 ? (
+              <View className="py-10 items-center justify-center">
+                <Ionicons
+                  name="filter-outline"
+                  size={36}
+                  color={colors.inkMuted}
+                />
+                <Text className="text-ink-muted dark:text-ink-mutedOnDark mt-2 text-sm">
+                  Bu filtrga mos test yo'q
+                </Text>
+              </View>
+            ) : null}
 
             {quizzes.map((quiz) => {
               const questionCount = quiz.questions?.length ?? 0;
@@ -104,7 +277,6 @@ export default function QuizScreen() {
                   questionCount={questionCount}
                   lastResult={quiz.last_result ?? null}
                   questionsLabel={t("questions")}
-                  lastAttemptLabel={t("lastAttempt")}
                   notAttemptedLabel={t("notAttempted")}
                   attemptLabel={t("attempt")}
                 />
@@ -124,7 +296,6 @@ interface QuizCardProps {
   questionCount: number;
   lastResult: QuizLastResult | null;
   questionsLabel: string;
-  lastAttemptLabel: string;
   notAttemptedLabel: string;
   attemptLabel: string;
 }
@@ -136,10 +307,10 @@ function QuizCard({
   questionCount,
   lastResult,
   questionsLabel,
-  lastAttemptLabel,
   notAttemptedLabel,
   attemptLabel,
 }: QuizCardProps) {
+  const colors = useThemeColors();
   const percent =
     lastResult && lastResult.total_questions > 0
       ? Math.round(
@@ -149,86 +320,80 @@ function QuizCard({
 
   const grade =
     percent === null
-      ? { text: "text-gray-500", bg: "bg-gray-100", bar: "bg-gray-300" }
+      ? null
       : percent >= 80
-        ? { text: "text-green-700", bg: "bg-green-50", bar: "bg-green-500" }
+        ? { chipBg: "bg-success-50", chipText: "text-success-600", bar: "bg-success" }
         : percent >= 60
-          ? { text: "text-yellow-700", bg: "bg-yellow-50", bar: "bg-yellow-500" }
-          : { text: "text-red-700", bg: "bg-red-50", bar: "bg-red-500" };
+          ? { chipBg: "bg-warning-50", chipText: "text-warning-600", bar: "bg-warning" }
+          : { chipBg: "bg-danger-50", chipText: "text-danger-600", bar: "bg-danger" };
+
+  const completed = lastResult !== null;
 
   return (
     <TouchableOpacity
-      className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+      className="bg-surface dark:bg-surface-dark rounded-2xl p-3 border border-edge dark:border-edge-dark"
       onPress={() => router.push(`/quiz/${id}`)}
       activeOpacity={0.7}
     >
-      <View className="flex-row items-center justify-between mb-2">
-        <Text
-          className="text-base font-semibold text-gray-900 flex-1 mr-2"
-          numberOfLines={1}
+      <View className="flex-row items-center gap-3">
+        <View
+          className="w-10 h-10 rounded-xl items-center justify-center"
+          style={{
+            backgroundColor: completed
+              ? colors.primarySoft
+              : colors.surfaceSoft,
+          }}
         >
-          {name}
-        </Text>
-        <View className="bg-blue-50 px-2.5 py-1 rounded-full">
-          <Text className="text-blue-600 text-xs font-medium">
-            {questionCount} {questionsLabel}
+          <Text
+            className={`font-extrabold ${
+              completed
+                ? "text-primary"
+                : "text-ink-muted dark:text-ink-mutedOnDark"
+            }`}
+            style={{ fontSize: 14 }}
+          >
+            {(name.match(/\d+/) ?? ["?"])[0]}
           </Text>
         </View>
-      </View>
-
-      {description ? (
-        <Text className="text-gray-500 text-sm mb-2" numberOfLines={2}>
-          {description}
-        </Text>
-      ) : null}
-
-      {lastResult ? (
-        <View className="mt-2 border-t border-gray-100 pt-3">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-[11px] uppercase tracking-wide text-gray-400 font-semibold">
-              {lastAttemptLabel}
-              {lastResult.attempt > 1 ? ` • #${lastResult.attempt}` : ""}
-            </Text>
-            <Text className={`text-sm font-bold ${grade.text}`}>
+        <View className="flex-1">
+          <Text
+            className="font-bold text-ink dark:text-ink-onDark"
+            style={{ fontSize: 14 }}
+            numberOfLines={1}
+          >
+            {name}
+          </Text>
+          <Text
+            className="text-ink-muted dark:text-ink-mutedOnDark mt-0.5"
+            style={{ fontSize: 11.5 }}
+          >
+            {completed
+              ? `${lastResult.correct_count}/${lastResult.total_questions} · ${attemptLabel} #${lastResult.attempt}`
+              : `${questionCount} ${questionsLabel} · ${notAttemptedLabel}`}
+          </Text>
+        </View>
+        {completed && grade ? (
+          <View className={`px-2.5 py-1 rounded-full ${grade.chipBg}`}>
+            <Text
+              className={`font-bold ${grade.chipText}`}
+              style={{ fontSize: 11 }}
+            >
               {percent}%
             </Text>
           </View>
-
-          <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
-            <View
-              className={`h-full rounded-full ${grade.bar}`}
-              style={{ width: `${percent ?? 0}%` }}
-            />
-          </View>
-
-          <View className="flex-row items-center gap-3">
-            <View className="flex-row items-center gap-1">
-              <View className="w-5 h-5 rounded-full bg-green-100 items-center justify-center">
-                <Ionicons name="checkmark" size={11} color="#16A34A" />
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">
-                {lastResult.correct_count}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <View className="w-5 h-5 rounded-full bg-red-100 items-center justify-center">
-                <Ionicons name="close" size={11} color="#EF4444" />
-              </View>
-              <Text className="text-xs font-semibold text-gray-700">
-                {lastResult.incorrect_count}
-              </Text>
-            </View>
-            <Text className="text-xs text-gray-400">
-              / {lastResult.total_questions}
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View className="flex-row items-center gap-1.5 mt-1">
-          <Ionicons name="time-outline" size={14} color="#9CA3AF" />
-          <Text className="text-gray-400 text-xs">{notAttemptedLabel}</Text>
-        </View>
-      )}
+        ) : (
+          <Ionicons name="chevron-forward" size={16} color={colors.inkDim} />
+        )}
+      </View>
+      {description ? (
+        <Text
+          className="text-ink-muted dark:text-ink-mutedOnDark mt-2"
+          style={{ fontSize: 12 }}
+          numberOfLines={2}
+        >
+          {description}
+        </Text>
+      ) : null}
     </TouchableOpacity>
   );
 }
