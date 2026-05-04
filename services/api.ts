@@ -32,9 +32,10 @@ export const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   async (config) => {
-    // Log outgoing request
-    console.log(`[Network Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-    
+    console.log(
+      `[Network Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+    );
+
     const token = await storage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

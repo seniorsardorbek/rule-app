@@ -127,6 +127,21 @@ const translations = {
     backToExamSelect: "Imtihon tanlash",
     tryNewExam: "Yangi imtihon",
 
+    // Login
+    welcomeBack: "Xush kelibsiz",
+    signInToContinue: "Davom etish uchun tizimga kiring",
+    phoneNumberLabel: "Telefon raqami",
+    passwordLabel: "Parol",
+    signInBtn: "Kirish",
+    signInError: "Kirishda xatolik. Qaytadan urinib ko'ring.",
+    invalidPhone: "Telefon raqami 9 ta raqamdan iborat bo'lishi kerak",
+    passwordMin: "Parol kamida 6 ta belgi bo'lsin",
+    forgotPassword: "Parolni unutdingizmi?",
+    noAccount: "Hisobingiz yo'qmi?",
+    signUpHere: "Ro'yxatdan o'ting",
+    showPassword: "Parolni ko'rsatish",
+    hidePassword: "Parolni yashirish",
+
     // Languages
     langUz: "O'zbek (Lotin)",
     langOz: "Ўзбек (Кирилл)",
@@ -258,6 +273,21 @@ const translations = {
     backToExamSelect: "Имтиҳон танлаш",
     tryNewExam: "Янги имтиҳон",
 
+    // Login
+    welcomeBack: "Хуш келибсиз",
+    signInToContinue: "Давом этиш учун тизимга киринг",
+    phoneNumberLabel: "Телефон рақами",
+    passwordLabel: "Парол",
+    signInBtn: "Кириш",
+    signInError: "Киришда хатолик. Қайтадан уриниб кўринг.",
+    invalidPhone: "Телефон рақами 9 та рақамдан иборат бўлиши керак",
+    passwordMin: "Парол камида 6 та белги бўлсин",
+    forgotPassword: "Паролни унутдингизми?",
+    noAccount: "Ҳисобингиз йўқми?",
+    signUpHere: "Рўйхатдан ўтинг",
+    showPassword: "Паролни кўрсатиш",
+    hidePassword: "Паролни яшириш",
+
     // Languages
     langUz: "O'zbek (Lotin)",
     langOz: "Ўзбек (Кирилл)",
@@ -388,6 +418,21 @@ const translations = {
     examPassThreshold: "Проходной балл: 90%",
     backToExamSelect: "Выбор экзамена",
     tryNewExam: "Новый экзамен",
+
+    // Login
+    welcomeBack: "С возвращением",
+    signInToContinue: "Войдите, чтобы продолжить",
+    phoneNumberLabel: "Номер телефона",
+    passwordLabel: "Пароль",
+    signInBtn: "Войти",
+    signInError: "Ошибка входа. Попробуйте снова.",
+    invalidPhone: "Номер должен содержать 9 цифр",
+    passwordMin: "Минимум 6 символов",
+    forgotPassword: "Забыли пароль?",
+    noAccount: "Нет аккаунта?",
+    signUpHere: "Зарегистрироваться",
+    showPassword: "Показать пароль",
+    hidePassword: "Скрыть пароль",
 
     // Languages
     langUz: "O'zbek (Lotin)",
