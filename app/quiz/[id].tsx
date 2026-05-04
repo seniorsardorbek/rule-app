@@ -24,6 +24,10 @@ import {
   selectAnswer,
   submitQuiz,
 } from "../../store/slices/quizSlice";
+import {
+  setCurrentQuestion,
+  clearCurrentQuestion,
+} from "../../store/slices/chatSlice";
 import { useThemeColors } from "../../theme/colors";
 
 export default function QuizPlayScreen() {
@@ -45,6 +49,24 @@ export default function QuizPlayScreen() {
       setCheckedIndices(new Set());
     }
   }, [id, dispatch]);
+
+  const sortedQuestionsAll = quiz?.questions
+    ? [...quiz.questions].sort((a, b) => a.order - b.order)
+    : [];
+  const activeQuestion = sortedQuestionsAll[currentIndex];
+  const activeQuestionId = activeQuestion?.id;
+  const activeImageUrl = activeQuestion?.image?.url ?? null;
+
+  useEffect(() => {
+    if (activeQuestionId) {
+      dispatch(
+        setCurrentQuestion({ id: activeQuestionId, imageUrl: activeImageUrl }),
+      );
+    }
+    return () => {
+      dispatch(clearCurrentQuestion());
+    };
+  }, [activeQuestionId, activeImageUrl, dispatch]);
 
   if (isLoading) {
     return (
@@ -74,8 +96,8 @@ export default function QuizPlayScreen() {
     );
   }
 
-  const sortedQuestions = [...quiz.questions].sort((a, b) => a.order - b.order);
-  const question = sortedQuestions[currentIndex];
+  const sortedQuestions = sortedQuestionsAll;
+  const question = activeQuestion;
   const totalQuestions = sortedQuestions.length;
   const answeredCount = Object.keys(answers).length;
   const selectedOptionId = question ? answers[question.id] : undefined;

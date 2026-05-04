@@ -20,6 +20,11 @@ import {
 } from "../../services/quiz";
 import { useT } from "../../services/i18n";
 import { getFileUrl } from "../../services/api";
+import { useAppDispatch } from "../../store/hooks";
+import {
+  setCurrentQuestion,
+  clearCurrentQuestion,
+} from "../../store/slices/chatSlice";
 import { useThemeColors, type ThemeColors } from "../../theme/colors";
 
 const PASS_THRESHOLD = 0.9;
@@ -72,6 +77,7 @@ export default function ExamPlayScreen() {
   const { count: countParam } = useLocalSearchParams<{ count?: string }>();
   const t = useT();
   const c = useThemeColors();
+  const dispatch = useAppDispatch();
   const requestedCount = Math.max(1, parseInt(countParam ?? "20", 10) || 20);
 
   const { data, isLoading, error } = useQuizzes({ limit: 1000 });
@@ -95,6 +101,21 @@ export default function ExamPlayScreen() {
   const [finished, setFinished] = useState(false);
   const [timeLeft, setTimeLeft] = useState(requestedCount * 60);
   const finishedRef = useRef(false);
+
+  const activeQuestion = questions[currentIndex];
+  useEffect(() => {
+    if (activeQuestion?.id && !finished) {
+      dispatch(
+        setCurrentQuestion({
+          id: activeQuestion.id,
+          imageUrl: activeQuestion.image?.url ?? null,
+        }),
+      );
+    }
+    return () => {
+      dispatch(clearCurrentQuestion());
+    };
+  }, [activeQuestion?.id, activeQuestion?.image?.url, finished, dispatch]);
 
   // Timer — drains while the exam is in progress, auto-finishes on zero.
   useEffect(() => {

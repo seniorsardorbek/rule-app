@@ -142,6 +142,19 @@ const translations = {
     showPassword: "Parolni ko'rsatish",
     hidePassword: "Parolni yashirish",
 
+    // Rule constructor (AI chat)
+    ruleConstructor: "Rule constructor",
+    ruleConstructorSubtitle: "Haydovchilik bo'yicha AI yordamchi",
+    chatPlaceholder: "Savolingizni yozing...",
+    chatSend: "Yuborish",
+    chatTyping: "AI yozmoqda...",
+    chatErrorGeneric: "Xatolik yuz berdi. Qayta urinib ko'ring.",
+    chatAttachedQuestion: "Joriy savol biriktirildi",
+    chatEmpty: "Istalgan savolni bering — testni ham, qoidalarni ham tushuntiraman.",
+    chatOnlyDriving: "Faqat haydovchilik va testlar bo'yicha javob beraman.",
+    chatConnecting: "Ulanmoqda...",
+    chatNotConnected: "Server bilan aloqa yo'q",
+
     // Languages
     langUz: "O'zbek (Lotin)",
     langOz: "Ўзбек (Кирилл)",
@@ -288,6 +301,19 @@ const translations = {
     showPassword: "Паролни кўрсатиш",
     hidePassword: "Паролни яшириш",
 
+    // Rule constructor (AI chat)
+    ruleConstructor: "Rule constructor",
+    ruleConstructorSubtitle: "Ҳайдовчилик бўйича AI ёрдамчи",
+    chatPlaceholder: "Саволингизни ёзинг...",
+    chatSend: "Юбориш",
+    chatTyping: "AI ёзмоқда...",
+    chatErrorGeneric: "Хатолик юз берди. Қайта уриниб кўринг.",
+    chatAttachedQuestion: "Жорий савол бириктирилди",
+    chatEmpty: "Исталган саволни беринг — тестни ҳам, қоидаларни ҳам тушунтираман.",
+    chatOnlyDriving: "Фақат ҳайдовчилик ва тестлар бўйича жавоб бераман.",
+    chatConnecting: "Уланмоқда...",
+    chatNotConnected: "Сервер билан алоқа йўқ",
+
     // Languages
     langUz: "O'zbek (Lotin)",
     langOz: "Ўзбек (Кирилл)",
@@ -418,6 +444,19 @@ const translations = {
     examPassThreshold: "Проходной балл: 90%",
     backToExamSelect: "Выбор экзамена",
     tryNewExam: "Новый экзамен",
+
+    // Rule constructor (AI chat)
+    ruleConstructor: "Rule constructor",
+    ruleConstructorSubtitle: "AI-помощник по ПДД",
+    chatPlaceholder: "Напишите ваш вопрос...",
+    chatSend: "Отправить",
+    chatTyping: "AI печатает...",
+    chatErrorGeneric: "Произошла ошибка. Попробуйте ещё раз.",
+    chatAttachedQuestion: "Текущий вопрос прикреплён",
+    chatEmpty: "Задайте любой вопрос — объясню тест и правила.",
+    chatOnlyDriving: "Отвечаю только по вождению и тестам.",
+    chatConnecting: "Подключение...",
+    chatNotConnected: "Нет связи с сервером",
 
     // Login
     welcomeBack: "С возвращением",

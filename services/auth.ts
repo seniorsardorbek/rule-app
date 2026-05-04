@@ -124,4 +124,12 @@ export const useVerifyMe = (enabled: boolean = true) => {
 export const logout = async () => {
   await storage.deleteItem("access_token");
   store.dispatch(logoutAction());
+  // Tear down the chat socket so it doesn't try to reconnect with the old token.
+  // Lazy require to avoid a cycle with services/chat.ts in production bundles.
+  try {
+    const { disconnectChat } = await import("./chat");
+    disconnectChat();
+  } catch {
+    // best-effort
+  }
 };

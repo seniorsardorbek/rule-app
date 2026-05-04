@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,10 @@ import { getFileUrl } from "../../services/api";
 import { verifyMeApi } from "../../services/auth";
 import { storage } from "../../services/storage";
 import { setCredentials } from "../../store/slices/authSlice";
+import {
+  setCurrentQuestion,
+  clearCurrentQuestion,
+} from "../../store/slices/chatSlice";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { useThemeColors } from "../../theme/colors";
 
@@ -52,6 +56,20 @@ export default function MistakesPracticeScreen() {
     () => (total === 0 ? 0 : ((currentIndex + 1) / total) * 100),
     [currentIndex, total],
   );
+
+  useEffect(() => {
+    if (question?.id) {
+      dispatch(
+        setCurrentQuestion({
+          id: question.id,
+          imageUrl: question.image?.url ?? null,
+        }),
+      );
+    }
+    return () => {
+      dispatch(clearCurrentQuestion());
+    };
+  }, [question?.id, question?.image?.url, dispatch]);
 
   const handleCloseSummary = () => {
     setSummary(null);
