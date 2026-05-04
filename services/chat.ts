@@ -89,9 +89,12 @@ function deriveBaseUrl(): string {
 }
 
 let sharedSocket: Socket | null = null;
+let sharedLang: string | null = null;
 
-async function getSocket(): Promise<Socket | null> {
-  if (sharedSocket && sharedSocket.connected) return sharedSocket;
+async function getSocket(lang: string): Promise<Socket | null> {
+  if (sharedSocket && sharedSocket.connected && sharedLang === lang) {
+    return sharedSocket;
+  }
   const token = await storage.getItem("access_token");
   if (!token) return null;
   if (sharedSocket) {
@@ -99,9 +102,10 @@ async function getSocket(): Promise<Socket | null> {
     sharedSocket = null;
   }
   const base = deriveBaseUrl();
+  sharedLang = lang;
   sharedSocket = io(`${base}/chat`, {
     transports: ["websocket"],
-    auth: { token },
+    auth: { token, lang },
     reconnection: true,
     reconnectionAttempts: 5,
   });
@@ -112,14 +116,16 @@ export function disconnectChat(): void {
   if (sharedSocket) {
     sharedSocket.disconnect();
     sharedSocket = null;
+    sharedLang = null;
   }
 }
 
 export interface UseChatOptions {
   enabled: boolean;
+  lang: string;
 }
 
-export function useChat({ enabled }: UseChatOptions) {
+export function useChat({ enabled, lang }: UseChatOptions) {
   const [state, dispatch] = useReducer(reducer, {
     status: "idle",
     messages: [],
@@ -135,7 +141,7 @@ export function useChat({ enabled }: UseChatOptions) {
 
     (async () => {
       dispatch({ type: "status", status: "connecting" });
-      const sock = await getSocket();
+      const sock = await getSocket(lang);
       if (cancelled || !sock) {
         dispatch({ type: "status", status: "error" });
         return;
@@ -188,7 +194,7 @@ export function useChat({ enabled }: UseChatOptions) {
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, lang]);
 
   const send = useCallback(
     (content: string, questionId?: string | null) => {

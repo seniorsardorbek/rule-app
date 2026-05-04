@@ -29,9 +29,13 @@ export function ChatPanel({ visible, onClose }: Props) {
   const currentQuestionId = useAppSelector(
     (s) => s.chat.currentQuestionId,
   );
+  const lang = useAppSelector((s) => s.lang.lang);
   const [input, setInput] = useState("");
   const listRef = useRef<FlatList<ChatMessage>>(null);
-  const { status, messages, inFlightId, send } = useChat({ enabled: visible });
+  const { status, messages, inFlightId, send } = useChat({
+    enabled: visible,
+    lang,
+  });
 
   useEffect(() => {
     if (messages.length > 0) {
