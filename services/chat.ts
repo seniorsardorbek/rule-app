@@ -96,13 +96,20 @@ async function getSocket(lang: string): Promise<Socket | null> {
     return sharedSocket;
   }
   const token = await storage.getItem("access_token");
-  if (!token) return null;
+  if (!token) {
+    console.warn("[chat lang] no access_token — cannot connect");
+    return null;
+  }
   if (sharedSocket) {
+    console.log(
+      `[chat lang] reconnecting (was lang=${sharedLang ?? "-"}, now lang=${lang})`,
+    );
     sharedSocket.disconnect();
     sharedSocket = null;
   }
   const base = deriveBaseUrl();
   sharedLang = lang;
+  console.log(`[chat lang] connecting to ${base}/chat with lang=${lang}`);
   sharedSocket = io(`${base}/chat`, {
     transports: ["websocket"],
     auth: { token, lang },
@@ -213,6 +220,9 @@ export function useChat({ enabled, lang }: UseChatOptions) {
       });
       dispatch({ type: "startAssistant", id: assistantId });
       assistantIdRef.current = assistantId;
+      console.log(
+        `[chat lang] sending message (sharedLang=${sharedLang ?? "-"}) questionId=${questionId ?? "-"}`,
+      );
       sock.emit("chat:send", { content, questionId: questionId ?? undefined });
     },
     [state.inFlightId],

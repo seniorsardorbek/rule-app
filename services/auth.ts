@@ -120,6 +120,16 @@ export const useVerifyMe = (enabled: boolean = true) => {
   });
 };
 
+// Update the authenticated user's preferred language on the server.
+// The server keeps `User.lang` and `Onboarding.language` in sync so the
+// chat WS handshake's fallback path matches the UI choice.
+export const updateUserLangApi = async (
+  lang: "uz" | "oz" | "ru",
+): Promise<User> => {
+  const response = await api.patch<User>("/users/me/lang", { lang });
+  return response.data;
+};
+
 // Helpers
 export const logout = async () => {
   await storage.deleteItem("access_token");

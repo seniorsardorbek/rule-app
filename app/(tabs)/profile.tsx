@@ -6,7 +6,8 @@ import { useColorScheme } from "nativewind";
 import { router } from "expo-router";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { setLang, type AppLang } from "../../store/slices/langSlice";
-import { logout } from "../../services/auth";
+import { logout, updateUserLangApi } from "../../services/auth";
+import { setCredentials } from "../../store/slices/authSlice";
 import { setThemeMode } from "../../services/theme";
 import { useT } from "../../services/i18n";
 import { useThemeColors } from "../../theme/colors";
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
   const user = useAppSelector((s) => s.auth.user);
+  const token = useAppSelector((s) => s.auth.token);
   const currentLang = useAppSelector((s) => s.lang.lang);
 
   const displayName = user
@@ -212,7 +214,21 @@ export default function ProfileScreen() {
                     backgroundColor: isActive ? colors.primarySoft : "transparent",
                     borderColor: isActive ? colors.primary : colors.border,
                   }}
-                  onPress={() => dispatch(setLang(value))}
+                  onPress={() => {
+                    dispatch(setLang(value));
+                    updateUserLangApi(value)
+                      .then((updated) => {
+                        if (token) {
+                          dispatch(setCredentials({ user: updated, token }));
+                        }
+                      })
+                      .catch((e) =>
+                        console.warn(
+                          "[lang] server update failed",
+                          e?.response?.data ?? e?.message,
+                        ),
+                      );
+                  }}
                   activeOpacity={0.7}
                 >
                   <Text

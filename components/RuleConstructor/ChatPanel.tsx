@@ -38,6 +38,10 @@ export function ChatPanel({ visible, onClose }: Props) {
   });
 
   useEffect(() => {
+    if (visible) console.log(`[chat lang] panel opened with lang=${lang}`);
+  }, [visible, lang]);
+
+  useEffect(() => {
     if (messages.length > 0) {
       requestAnimationFrame(() => {
         listRef.current?.scrollToEnd({ animated: true });
