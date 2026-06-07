@@ -67,6 +67,15 @@ api.interceptors.response.use(
       await storage.deleteItem("access_token");
       router.replace("/(auth)/login");
     }
+
+    // School subscription expired → gate the student out of content (keep the
+    // token; they're authenticated, just unsubscribed).
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.message === "errors.subscription_expired"
+    ) {
+      router.replace("/(subscription)/expired");
+    }
     return Promise.reject(error);
   },
 );

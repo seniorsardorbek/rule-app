@@ -18,6 +18,7 @@ interface State {
   status: "idle" | "connecting" | "connected" | "error" | "disconnected";
   messages: ChatMessage[];
   inFlightId: string | null;
+  errorCode: string | null;
 }
 
 type Action =
@@ -27,7 +28,7 @@ type Action =
   | { type: "startAssistant"; id: string }
   | { type: "chunk"; id: string; delta: string }
   | { type: "done"; id: string; full: string; created_at?: string }
-  | { type: "error"; id: string | null }
+  | { type: "error"; id: string | null; code?: string }
   | { type: "clearLocal" };
 
 function reducer(state: State, action: Action): State {
@@ -42,6 +43,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         inFlightId: action.id,
+        errorCode: null,
         messages: [
           ...state.messages,
           { id: action.id, role: "assistant", content: "", pending: true },
@@ -58,6 +60,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         inFlightId: null,
+        errorCode: null,
         messages: state.messages.map((m) =>
           m.id === action.id
             ? { ...m, content: action.full, pending: false, created_at: action.created_at }
@@ -65,13 +68,17 @@ function reducer(state: State, action: Action): State {
         ),
       };
     case "error":
+      // In-session errors (quota / AI failure) do NOT disconnect the socket, so
+      // keep `status` as-is (the socket is still usable for retry) and surface the
+      // failure via `errorCode` + the inline banner. Connection/handshake failures
+      // are represented separately by the "status"/"disconnect" actions.
       return {
         ...state,
         inFlightId: null,
+        errorCode: action.code ?? "generic",
         messages: action.id
           ? state.messages.filter((m) => m.id !== action.id)
           : state.messages,
-        status: "error",
       };
     case "clearLocal":
       return { ...state, messages: [] };
@@ -137,6 +144,7 @@ export function useChat({ enabled, lang }: UseChatOptions) {
     status: "idle",
     messages: [],
     inFlightId: null,
+    errorCode: null,
   });
   const socketRef = useRef<Socket | null>(null);
   const assistantIdRef = useRef<string | null>(null);
@@ -177,8 +185,12 @@ export function useChat({ enabled, lang }: UseChatOptions) {
         dispatch({ type: "done", id: targetId, full, created_at });
         assistantIdRef.current = null;
       };
-      const onError = () =>
-        dispatch({ type: "error", id: assistantIdRef.current });
+      const onError = (payload?: { code?: string; message?: string }) =>
+        dispatch({
+          type: "error",
+          id: assistantIdRef.current,
+          code: payload?.code,
+        });
 
       sock.on("connect", onConnect);
       sock.on("disconnect", onDisconnect);

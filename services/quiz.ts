@@ -34,6 +34,8 @@ export interface QuizQuestion {
   topic_name_oz?: string | null;
   topic_name_ru?: string | null;
   order: number;
+  video_url?: string | null;
+  video_thumbnail_url?: string | null;
   image?: {
     id: string;
     url: string;
@@ -230,6 +232,19 @@ export const useQuiz = (id: string) => {
     queryKey: ["quizzes", id],
     queryFn: () => getQuizByIdApi(id),
     enabled: !!id,
+  });
+};
+
+// Questions that carry an explanation video, for the Study tab video library.
+export const getVideosApi = async (): Promise<QuizQuestion[]> => {
+  const response = await api.get<QuizQuestion[]>("/quiz/videos");
+  return response.data;
+};
+
+export const useVideos = () => {
+  return useQuery({
+    queryKey: ["videos"],
+    queryFn: getVideosApi,
   });
 };
 

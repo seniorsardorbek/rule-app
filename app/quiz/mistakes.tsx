@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Image,
   Alert,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -333,6 +334,21 @@ export default function MistakesPracticeScreen() {
               resizeMode="contain"
             />
           </View>
+        ) : null}
+
+        {/* Explanation video */}
+        {question.video_url ? (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => Linking.openURL(question.video_url as string)}
+            className="flex-row items-center rounded-2xl px-4 py-3 mb-4"
+            style={{ backgroundColor: c.primarySoft }}
+          >
+            <Ionicons name="play-circle" size={22} color={c.primary} />
+            <Text className="ml-2 font-semibold" style={{ color: c.primary, fontSize: 14 }}>
+              {t("watchVideo")}
+            </Text>
+          </TouchableOpacity>
         ) : null}
 
         {/* Options */}

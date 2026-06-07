@@ -64,7 +64,9 @@ export default function LoginScreen() {
     loginMutation.mutate(
       { phone_number, password: data.password },
       {
-        onSuccess: () => router.replace("/(tabs)"),
+        // First login (admin-created account, onboarding not filled) → wizard.
+        onSuccess: (res) =>
+          router.replace(res.user?.onboarding ? "/(tabs)" : "/(onboarding)"),
         onError: (error: any) => {
           const message = error?.response?.data?.message ?? t("signInError");
           Alert.alert(t("signInBtn"), message);
@@ -333,29 +335,6 @@ export default function LoginScreen() {
                 )}
               </LinearGradient>
             </TouchableOpacity>
-
-            <View
-              className="flex-row items-center justify-center mt-7"
-              style={{ gap: 6 }}
-            >
-              <Text
-                className="text-ink-muted dark:text-ink-mutedOnDark"
-                style={{ fontSize: 13 }}
-              >
-                {t("noAccount")}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => router.push("/(onboarding)")}
-              >
-                <Text
-                  className="font-extrabold"
-                  style={{ fontSize: 13, color: c.primary }}
-                >
-                  {t("signUpHere")}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

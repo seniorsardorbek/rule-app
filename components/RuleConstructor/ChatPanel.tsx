@@ -32,7 +32,7 @@ export function ChatPanel({ visible, onClose }: Props) {
   const lang = useAppSelector((s) => s.lang.lang);
   const [input, setInput] = useState("");
   const listRef = useRef<FlatList<ChatMessage>>(null);
-  const { status, messages, inFlightId, send } = useChat({
+  const { status, messages, inFlightId, send, errorCode } = useChat({
     enabled: visible,
     lang,
   });
@@ -254,6 +254,27 @@ export function ChatPanel({ visible, onClose }: Props) {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             />
+
+            {errorCode ? (
+              <View
+                style={{
+                  marginHorizontal: 14,
+                  marginBottom: 6,
+                  borderRadius: 12,
+                  backgroundColor: c.dangerSoft,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                }}
+              >
+                <Text style={{ color: c.dangerDeep, fontSize: 13 }}>
+                  {errorCode === "ai_limit_reached"
+                    ? t("aiLimitReached")
+                    : errorCode === "subscription_expired"
+                      ? t("subscriptionExpiredDesc")
+                      : t("chatErrorGeneric")}
+                </Text>
+              </View>
+            ) : null}
 
             <View
               style={{

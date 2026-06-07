@@ -154,6 +154,19 @@ const translations = {
     chatOnlyDriving: "Faqat haydovchilik va testlar bo'yicha javob beraman.",
     chatConnecting: "Ulanmoqda...",
     chatNotConnected: "Server bilan aloqa yo'q",
+    aiLimitReached: "Oylik AI savollar limiti tugadi.",
+
+    // Videos (Study tab)
+    studyTitle: "Videodarslar",
+    studySubtitle: "Mavzular bo'yicha tushuntirish videolari",
+    videosByTopic: "Mavzular bo'yicha",
+    noVideos: "Videolar mavjud emas",
+    watchVideo: "Videoni ko'rish",
+
+    // Subscription
+    subscriptionExpiredTitle: "Obuna muddati tugagan",
+    subscriptionExpiredDesc: "Davom etish uchun maktabingiz bilan bog'laning.",
+    subExpiredLogout: "Chiqish",
 
     // Languages
     langUz: "O'zbek (Lotin)",
@@ -313,6 +326,19 @@ const translations = {
     chatOnlyDriving: "Фақат ҳайдовчилик ва тестлар бўйича жавоб бераман.",
     chatConnecting: "Уланмоқда...",
     chatNotConnected: "Сервер билан алоқа йўқ",
+    aiLimitReached: "Ойлик AI саволлар лимити тугади.",
+
+    // Videos (Study tab)
+    studyTitle: "Видеодарслар",
+    studySubtitle: "Мавзулар бўйича тушунтириш видеолари",
+    videosByTopic: "Мавзулар бўйича",
+    noVideos: "Видеолар мавжуд эмас",
+    watchVideo: "Видеони кўриш",
+
+    // Subscription
+    subscriptionExpiredTitle: "Обуна муддати тугаган",
+    subscriptionExpiredDesc: "Давом этиш учун мактабингиз билан боғланинг.",
+    subExpiredLogout: "Чиқиш",
 
     // Languages
     langUz: "O'zbek (Lotin)",
@@ -457,6 +483,19 @@ const translations = {
     chatOnlyDriving: "Отвечаю только по вождению и тестам.",
     chatConnecting: "Подключение...",
     chatNotConnected: "Нет связи с сервером",
+    aiLimitReached: "Месячный лимит вопросов AI исчерпан.",
+
+    // Videos (Study tab)
+    studyTitle: "Видеоуроки",
+    studySubtitle: "Видео-объяснения по темам",
+    videosByTopic: "По темам",
+    noVideos: "Видео недоступны",
+    watchVideo: "Смотреть видео",
+
+    // Subscription
+    subscriptionExpiredTitle: "Подписка истекла",
+    subscriptionExpiredDesc: "Свяжитесь с вашей автошколой, чтобы продолжить.",
+    subExpiredLogout: "Выйти",
 
     // Login
     welcomeBack: "С возвращением",

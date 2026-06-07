@@ -18,6 +18,7 @@ import { storage } from "../../services/storage";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { setCredentials } from "../../store/slices/authSlice";
 import api from "../../services/api";
+import { verifyMeApi } from "../../services/auth";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColors, type ThemeColors } from "../../theme/colors";
 
@@ -130,29 +131,40 @@ export default function OnboardingScreen() {
 
     setSaving(true);
     try {
-      if (isAuthenticated && token) {
-        await api.patch("/users/onboarding", finalData);
-        if (user) {
-          dispatch(
-            setCredentials({
-              user: {
-                ...user,
-                onboarding: {
-                  ...finalData,
-                  completed_at: new Date().toISOString(),
-                },
-              },
-              token,
-            }),
-          );
+      // B2B: onboarding is authenticated-only (admin creates the account, the
+      // student fills onboarding on first login). Re-hydrate if Redux was wiped.
+      let activeUser = user;
+      let activeToken = token;
+      if (!activeUser || !activeToken) {
+        const stored = await storage.getItem("access_token");
+        if (!stored) {
+          router.replace("/(auth)/login");
+          return;
         }
-        await storage.setItem("onboarding_completed", "true");
-        router.replace("/(tabs)");
-      } else {
-        await storage.setItem("onboarding_data", JSON.stringify(finalData));
-        await storage.setItem("onboarding_completed", "true");
-        router.replace("/(auth)/login");
+        const verified = await verifyMeApi();
+        if (!verified.isLoggedIn || !verified.user) {
+          router.replace("/(auth)/login");
+          return;
+        }
+        activeUser = verified.user;
+        activeToken = stored;
       }
+
+      await api.patch("/users/onboarding", finalData);
+      dispatch(
+        setCredentials({
+          user: {
+            ...activeUser,
+            onboarding: {
+              ...finalData,
+              completed_at: new Date().toISOString(),
+            },
+          },
+          token: activeToken,
+        }),
+      );
+      await storage.setItem("onboarding_completed", "true");
+      router.replace("/(tabs)");
     } catch {
       Alert.alert(
         "Xatolik",
