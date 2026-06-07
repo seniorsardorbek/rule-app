@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.aiautotest"
+      "bundleIdentifier": "uz.rule.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.aiautotest"
+      "package": "uz.rule.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
