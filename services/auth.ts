@@ -35,15 +35,6 @@ export interface SignInRequest {
   password: string;
 }
 
-export interface SignUpRequest {
-  first_name: string;
-  last_name?: string;
-  phone_number: string;
-  password: string;
-  lang?: string;
-  onboarding?: OnboardingData;
-}
-
 export interface AuthResponse {
   access_token: string;
   token_type: string;
@@ -63,18 +54,6 @@ export const signInApi = async (data: SignInRequest): Promise<AuthResponse> => {
   return response.data;
 };
 
-export const signUpApi = async (data: SignUpRequest): Promise<AuthResponse> => {
-  // Get onboarding data from storage if not provided
-  if (!data.onboarding) {
-    const onboardingRaw = await storage.getItem("onboarding_data");
-    if (onboardingRaw) {
-      data.onboarding = JSON.parse(onboardingRaw);
-    }
-  }
-  const response = await api.post<AuthResponse>("/auth/sign-up", data);
-  return response.data;
-};
-
 export const verifyMeApi = async (): Promise<VerifyResponse> => {
   const response = await api.get<VerifyResponse>("/auth/me");
   return response.data;
@@ -84,21 +63,6 @@ export const verifyMeApi = async (): Promise<VerifyResponse> => {
 export const useLogin = () => {
   return useMutation({
     mutationFn: signInApi,
-    onSuccess: async (data) => {
-      await storage.setItem("access_token", data.access_token);
-      store.dispatch(
-        setCredentials({
-          user: data.user,
-          token: data.access_token,
-        }),
-      );
-    },
-  });
-};
-
-export const useSignUp = () => {
-  return useMutation({
-    mutationFn: signUpApi,
     onSuccess: async (data) => {
       await storage.setItem("access_token", data.access_token);
       store.dispatch(

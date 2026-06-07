@@ -17,8 +17,10 @@ import { router } from "expo-router";
 import { storage } from "../../services/storage";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { setCredentials } from "../../store/slices/authSlice";
+import { setLang, type AppLang } from "../../store/slices/langSlice";
 import api from "../../services/api";
 import { verifyMeApi } from "../../services/auth";
+import { useT } from "../../services/i18n";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useThemeColors, type ThemeColors } from "../../theme/colors";
 
@@ -44,6 +46,7 @@ export default function OnboardingScreen() {
   const { isAuthenticated, user, token } = useAppSelector((s) => s.auth);
   const dispatch = useAppDispatch();
   const c = useThemeColors();
+  const t = useT();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [answers, setAnswers] = useState<OnboardingAnswers>({});
@@ -91,6 +94,15 @@ export default function OnboardingScreen() {
 
   const selectOption = (key: string, value: string, nextStep: number) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
+    if (key === "language") {
+      const map: Record<string, AppLang> = {
+        uz: "uz",
+        uz_cyrl: "oz",
+        ru: "ru",
+      };
+      const mapped = map[value];
+      if (mapped) dispatch(setLang(mapped));
+    }
     animateTransition(nextStep);
   };
 
@@ -166,10 +178,7 @@ export default function OnboardingScreen() {
       await storage.setItem("onboarding_completed", "true");
       router.replace("/(tabs)");
     } catch {
-      Alert.alert(
-        "Xatolik",
-        "Ma'lumotlarni saqlashda xatolik yuz berdi. Qaytadan urinib ko'ring.",
-      );
+      Alert.alert(t("obSaveErrorTitle"), t("obSaveError"));
     } finally {
       setSaving(false);
     }
@@ -333,29 +342,30 @@ function Step1({
   c,
   onSelect,
 }: StepProps & { onSelect: (v: string) => void }) {
+  const t = useT();
   return (
     <View>
       <HeroIcon c={c} icon="car-sport" />
-      <Eyebrow c={c}>Boshlaymiz</Eyebrow>
-      <Heading>Pravaga birinchi urinishda topshirishga tayyormisiz?</Heading>
-      <Subheading>Tilni tanlang</Subheading>
+      <Eyebrow c={c}>{t("obStep1Eyebrow")}</Eyebrow>
+      <Heading>{t("obStep1Title")}</Heading>
+      <Subheading>{t("obStep1Sub")}</Subheading>
       <View className="gap-2.5">
         <OptionRow
           c={c}
           emoji="🇺🇿"
-          label="O'zbekcha (lotin)"
+          label={t("obLangUzLatin")}
           onPress={() => onSelect("uz")}
         />
         <OptionRow
           c={c}
           emoji="🇺🇿"
-          label="Ўзбекча (кирил)"
+          label={t("obLangUzCyrl")}
           onPress={() => onSelect("uz_cyrl")}
         />
         <OptionRow
           c={c}
           emoji="🇷🇺"
-          label="Русский"
+          label={t("obLangRu")}
           onPress={() => onSelect("ru")}
         />
       </View>
@@ -367,15 +377,16 @@ function Step2({
   c,
   onSelect,
 }: StepProps & { onSelect: (v: string) => void }) {
+  const t = useT();
   return (
     <View>
       <HeroIcon c={c} icon="people" />
-      <Eyebrow c={c}>2-qadam</Eyebrow>
-      <Heading>Jinsingizni tanlang</Heading>
-      <Subheading>Shaxsiy rejani to'g'ri shakllantirish uchun</Subheading>
+      <Eyebrow c={c}>{t("obStep2")}</Eyebrow>
+      <Heading>{t("obGenderTitle")}</Heading>
+      <Subheading>{t("obGenderSub")}</Subheading>
       <View className="flex-row gap-3">
-        <GenderCard c={c} emoji="👨" label="Erkak" onPress={() => onSelect("male")} />
-        <GenderCard c={c} emoji="👩" label="Ayol" onPress={() => onSelect("female")} />
+        <GenderCard c={c} emoji="👨" label={t("obMale")} onPress={() => onSelect("male")} />
+        <GenderCard c={c} emoji="👩" label={t("obFemale")} onPress={() => onSelect("female")} />
       </View>
     </View>
   );
@@ -385,18 +396,19 @@ function Step3({
   c,
   onSelect,
 }: StepProps & { onSelect: (v: string) => void }) {
+  const t = useT();
   return (
     <View>
       <HeroIcon c={c} icon="calendar" />
-      <Eyebrow c={c}>3-qadam</Eyebrow>
-      <Heading>Yoshingiz nechida?</Heading>
-      <Subheading>Eng mos darslarni tayyorlaymiz</Subheading>
+      <Eyebrow c={c}>{t("obStep3")}</Eyebrow>
+      <Heading>{t("obAgeTitle")}</Heading>
+      <Subheading>{t("obAgeSub")}</Subheading>
       <View className="gap-2.5">
         <OptionRow c={c} label="17 — 19" onPress={() => onSelect("17-19")} />
         <OptionRow c={c} label="20 — 24" onPress={() => onSelect("20-24")} />
         <OptionRow c={c} label="25 — 30" onPress={() => onSelect("25-30")} />
         <OptionRow c={c} label="31 — 35" onPress={() => onSelect("31-35")} />
-        <OptionRow c={c} label="36 va undan katta" onPress={() => onSelect("36+")} />
+        <OptionRow c={c} label={t("obAge36Plus")} onPress={() => onSelect("36+")} />
       </View>
     </View>
   );
@@ -412,18 +424,19 @@ function Step4({
   onToggle: (v: string) => void;
   onNext: () => void;
 }) {
+  const t = useT();
   const items: { key: string; label: string; emoji: string }[] = [
-    { key: "time", label: "Vaqtim juda kam", emoji: "⏱️" },
-    { key: "hard", label: "Chiptalar juda murakkab", emoji: "🤯" },
-    { key: "forget", label: "O'qiganimni tez unutib qo'yaman", emoji: "🧠" },
-    { key: "first_time", label: "Birinchi marta topshiryapman", emoji: "🔰" },
+    { key: "time", label: t("obProblemTime"), emoji: "⏱️" },
+    { key: "hard", label: t("obProblemHard"), emoji: "🤯" },
+    { key: "forget", label: t("obProblemForget"), emoji: "🧠" },
+    { key: "first_time", label: t("obProblemFirstTime"), emoji: "🔰" },
   ];
   return (
     <View className="flex-1">
       <HeroIcon c={c} icon="alert-circle" />
-      <Eyebrow c={c}>4-qadam</Eyebrow>
-      <Heading>Sizga nima ko'proq muammo tug'diryapti?</Heading>
-      <Subheading>Bir nechtasini tanlashingiz mumkin</Subheading>
+      <Eyebrow c={c}>{t("obStep4")}</Eyebrow>
+      <Heading>{t("obProblemsTitle")}</Heading>
+      <Subheading>{t("obProblemsSub")}</Subheading>
       <View className="gap-2.5">
         {items.map((item) => (
           <CheckboxRow
@@ -439,7 +452,7 @@ function Step4({
       <View className="mt-8">
         <PrimaryButton
           c={c}
-          label="Keyingi"
+          label={t("obNext")}
           icon="arrow-forward"
           onPress={onNext}
           disabled={selected.length === 0}
@@ -450,17 +463,14 @@ function Step4({
 }
 
 function Step5({ c, onNext }: StepProps & { onNext: () => void }) {
-  const items = [
-    "Kuniga atigi 15 daqiqa ajratsangiz yetarli",
-    "Qiziqarli video tushuntirishlar",
-    "Sun'iy intellekt xatolaringiz ustida ishlashga yordam beradi",
-  ];
+  const t = useT();
+  const items = [t("obBenefit1"), t("obBenefit2"), t("obBenefit3")];
   return (
     <View className="flex-1">
       <HeroIcon c={c} icon="bulb" tint="success" />
-      <Eyebrow c={c}>Tayyormiz</Eyebrow>
-      <Heading>Bizda aynan siz uchun yechim bor</Heading>
-      <Subheading>Quyidagilarni qoʻlga kiritasiz</Subheading>
+      <Eyebrow c={c}>{t("obStep5Eyebrow")}</Eyebrow>
+      <Heading>{t("obStep5Title")}</Heading>
+      <Subheading>{t("obStep5Sub")}</Subheading>
       <View className="gap-2.5">
         {items.map((text) => (
           <View
@@ -486,7 +496,7 @@ function Step5({ c, onNext }: StepProps & { onNext: () => void }) {
       <View className="mt-8">
         <PrimaryButton
           c={c}
-          label="Davom etish"
+          label={t("obContinue")}
           icon="arrow-forward"
           onPress={onNext}
         />
@@ -499,18 +509,19 @@ function Step6({
   c,
   onSelect,
 }: StepProps & { onSelect: (v: string) => void }) {
+  const t = useT();
   const opts: { key: string; label: string; sub: string }[] = [
-    { key: "15m", label: "15-20 daqiqa", sub: "Sekin va ishonchli" },
-    { key: "30m", label: "30-45 daqiqa", sub: "O'rtacha temp" },
-    { key: "1h", label: "1 soat", sub: "Tezkor" },
-    { key: "2h", label: "1 soatdan ko'p", sub: "Intensiv" },
+    { key: "15m", label: "15-20 daqiqa", sub: t("obDailyTimeSlow") },
+    { key: "30m", label: "30-45 daqiqa", sub: t("obDailyTimeMedium") },
+    { key: "1h", label: "1 soat", sub: t("obDailyTimeFast") },
+    { key: "2h", label: "1 soatdan ko'p", sub: t("obDailyTimeIntense") },
   ];
   return (
     <View>
       <HeroIcon c={c} icon="time" />
-      <Eyebrow c={c}>6-qadam</Eyebrow>
-      <Heading>Tayyorgarlik uchun kuniga qancha vaqt?</Heading>
-      <Subheading>Reja shu rejimga moslanadi</Subheading>
+      <Eyebrow c={c}>{t("obStep6")}</Eyebrow>
+      <Heading>{t("obDailyTimeTitle")}</Heading>
+      <Subheading>{t("obDailyTimeSub")}</Subheading>
       <View className="gap-2.5">
         {opts.map((o) => (
           <TwoLineRow
@@ -540,6 +551,7 @@ function Step7({
   setShowPicker: (v: boolean) => void;
   onNext: () => void;
 }) {
+  const t = useT();
   const formatted = examDate.toLocaleDateString("uz-UZ", {
     year: "numeric",
     month: "long",
@@ -548,9 +560,9 @@ function Step7({
   return (
     <View className="flex-1">
       <HeroIcon c={c} icon="flag" />
-      <Eyebrow c={c}>7-qadam</Eyebrow>
-      <Heading>Imtihoningiz qachon?</Heading>
-      <Subheading>Taxminiy sanani tanlang — kunlik maqsad shu boʻyicha hisoblanadi</Subheading>
+      <Eyebrow c={c}>{t("obStep7")}</Eyebrow>
+      <Heading>{t("obExamDateTitle")}</Heading>
+      <Subheading>{t("obExamDateSub")}</Subheading>
 
       {Platform.OS === "web" ? (
         <View
@@ -642,7 +654,7 @@ function Step7({
       <View className="mt-8">
         <PrimaryButton
           c={c}
-          label="Rejani hisoblash"
+          label={t("obCalcPlan")}
           icon="sparkles"
           onPress={onNext}
         />
@@ -663,6 +675,7 @@ function Step8({
   saving: boolean;
   onComplete: () => void;
 }) {
+  const t = useT();
   const dailyQuestions = Math.max(10, Math.round(720 / Math.max(1, days)));
   const dailyQuizzes = Math.max(1, Math.round(dailyQuestions / 20));
   return (
@@ -693,13 +706,15 @@ function Step8({
           className="text-white font-extrabold"
           style={{ fontSize: 22, letterSpacing: -0.4 }}
         >
-          Shaxsiy rejangiz tayyor!
+          {t("obPlanReadyTitle")}
         </Text>
         <Text
           className="text-white/90 mt-1.5"
           style={{ fontSize: 13, lineHeight: 18 }}
         >
-          Imtihongacha {days} kun. Reja kuniga moslashadi.
+          {t("obPlanDaysPrefix")}
+          {days}
+          {t("obPlanDaysSuffix")}
         </Text>
       </LinearGradient>
 
@@ -717,13 +732,13 @@ function Step8({
             color: c.primary,
           }}
         >
-          Kunlik reja
+          {t("obDailyPlan")}
         </Text>
         <PlanRow
           c={c}
           icon="document-text"
-          label="Savollar"
-          value={`~${dailyQuestions} ta / kun`}
+          label={t("obQuestions")}
+          value={`~${dailyQuestions} ${t("obPerDay")}`}
         />
         <View
           style={{
@@ -735,8 +750,8 @@ function Step8({
         <PlanRow
           c={c}
           icon="reader"
-          label="Testlar"
-          value={`~${dailyQuizzes} ta / kun`}
+          label={t("obTests")}
+          value={`~${dailyQuizzes} ${t("obPerDay")}`}
         />
         <View
           style={{
@@ -748,21 +763,15 @@ function Step8({
         <PlanRow
           c={c}
           icon="calendar"
-          label="Imtihongacha"
-          value={`${days} kun`}
+          label={t("obUntilExam")}
+          value={`${days} ${t("obDaysUnit")}`}
         />
       </View>
 
       <View className="mt-8">
         <PrimaryButton
           c={c}
-          label={
-            saving
-              ? "Saqlanmoqda..."
-              : isAuthenticated
-                ? "Boshlash"
-                : "Roʻyxatdan oʻtish va boshlash"
-          }
+          label={saving ? t("obSaving") : t("obStartBtn")}
           icon={saving ? undefined : "rocket"}
           onPress={onComplete}
           disabled={saving}
